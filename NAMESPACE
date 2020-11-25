@@ -1,0 +1,11 @@
+useDynLib(RFGLS, .registration=TRUE)
+
+export(RFGLS_tree)
+export(RFGLS_estimate_spatial)
+export(RFGLS_estimate_timeseries)
+export(RFGLS_predict)
+export(RFGLS_predict_spatial)
+
+
+import(RANN, parallel, stats, rdist, matrixStats, pbapply, randomForest)
+importFrom("graphics", "legend", "lines", "plot")
