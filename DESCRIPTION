@@ -1,4 +1,4 @@
-Package: RFGLS
+Package: RandomForestsGLS
 Type: Package
 Title: Random Forests for dependent data
 Version: 0.1.0
