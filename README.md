@@ -1,8 +1,8 @@
-RFGLS
+RandomForestsGLS
 ====
 
 ## Overview
-RFGLS: Random Forests for dependent data: Fits non-linear regression models on dependent data with Generalised Least Square (GLS) based Random Forest (RF-GLS) detailed in Saha, Basu and Datta (2020) <https://arxiv.org/abs/2007.15421>.
+RandomForestsGLS: Random Forests for dependent data: Fits non-linear regression models on dependent data with Generalised Least Square (GLS) based Random Forest (RF-GLS) detailed in Saha, Basu and Datta (2020) <https://arxiv.org/abs/2007.15421>.
 
 
 ## Installation
