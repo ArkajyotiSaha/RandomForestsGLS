@@ -1,4 +1,4 @@
-useDynLib(RFGLS, .registration=TRUE)
+useDynLib(RandomForestsGLS, .registration=TRUE)
 
 export(RFGLS_tree)
 export(RFGLS_estimate_spatial)
