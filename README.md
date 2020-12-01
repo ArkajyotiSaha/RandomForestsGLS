@@ -10,7 +10,7 @@ In order to download the package, please run the following command in R:
 
 ```{r }
 if (!require("devtools")) install.packages("devtools")
-devtools::install_github("ArkajyotiSaha/RFGLS", ref ="HEAD")
+devtools::install_github("ArkajyotiSaha/RandomForestsGLS", ref ="HEAD")
 ```
 
 ## Function description
