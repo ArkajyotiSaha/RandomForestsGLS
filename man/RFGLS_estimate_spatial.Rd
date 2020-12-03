@@ -150,7 +150,7 @@ D <- as.matrix(dist(coords))
 R <- exp(-phi*D)
 w <- rmvn(1, rep(0,n), sigma.sq*R)
 
-y <- rnorm(n, 10*sin(pi * x[,1]) + w, sqrt(tau.sq))
+y <- rnorm(n, 10*sin(pi * x) + w, sqrt(tau.sq))
 
 estimation_result <- RFGLS_estimate_spatial(coords, y, x, ntree = 10)
 
