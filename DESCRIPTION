@@ -1,4 +1,4 @@
-Package: RFGLS
+Package: RandomForestsGLS
 Type: Package
 Title: Random Forests for dependent data
 Version: 0.1.0
@@ -6,13 +6,14 @@ Authors@R: c(person("Arkajyoti", "Saha", role=c("aut", "cre"), email="arkajyotis
 Maintainer: Arkajyoti Saha <arkajyotisaha93@gmail.com>
 Author: Arkajyoti Saha [aut, cre],
   Abhirup Datta [aut]
-Depends: R (>= 3.3.0), BRISC, parallel, stats, matrixStats, randomForest,
+Depends: R (>= 3.3.0), knitr, BRISC, parallel, stats, matrixStats, randomForest,
         pbapply
-Description: Fits non-linear regression models on dependant data with Generalised Least Square (GLS) based Random Forest (RF-GLS) detailed in Saha, Basu and Datta (2018) <https://arxiv.org/abs/2007.15421>.
+Description: Fits non-linear regression models on dependant data with Generalised Least Square (GLS) based Random Forest (RF-GLS) detailed in Saha, Basu and Datta (2020) <https://arxiv.org/abs/2007.15421>.
 License: GPL (>= 2)
 URL: https://github.com/ArkajyotiSaha/RFGLS
 BugReports: https://github.com/ArkajyotiSaha/RFGLS/issues
 Encoding: UTF-8
+VignetteBuilder: knitr
 NeedsCompilation: yes
 RoxygenNote: 6.1.1
 Packaged: 2020-09-25 4:29:25 UTC; arkajyotisaha
