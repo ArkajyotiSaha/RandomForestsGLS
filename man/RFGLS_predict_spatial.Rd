@@ -93,7 +93,7 @@ D <- as.matrix(dist(coords))
 R <- exp(-phi*D)
 w <- rmvn(1, rep(0,n), sigma.sq*R)
 
-y <- rnorm(n, 10*sin(pi * x[,1]) + w, sqrt(tau.sq))
+y <- rnorm(n, 10*sin(pi * x) + w, sqrt(tau.sq))
 
 estimation_result <- RFGLS_estimate_spatial(coords[1:200,], y[1:200], matrix(x[1:200,],200,1), ntree = 10)
 prediction_result <- RFGLS_predict_spatial(estimation_result, coords[1:200,], coords[201:250,], matrix(x[201:250,],50,1))
