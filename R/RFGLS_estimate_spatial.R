@@ -11,10 +11,13 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
     sp <- randomForest(X, y)
     sp_input_est <- predict(sp, X)
     rf_residual <- y - sp_input_est
-    est_theta <- BRISC_estimation(coords, x = matrix(1,n,1), y = rf_residual, verbose = FALSE)
+    est_theta <- BRISC_estimation(coords, x = matrix(1,n,1), y = rf_residual, verbose = FALSE, cov.model = cov.model)
     sigma.sq <- est_theta$Theta[1]
     tau.sq <- est_theta$Theta[2]
     phi <- est_theta$Theta[3]
+    if(cov.model =="matern"){
+      nu <- est_theta$Theta[4]
+    }
   }
 
   cov.model.names <- c("exponential","spherical","matern","gaussian")
