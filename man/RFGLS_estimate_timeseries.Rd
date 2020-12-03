@@ -51,7 +51,8 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
   \item{h}{Number of core to be used in parallel computing setup for bootstrap samples. If h = 1, there is no parallelization.
            Default value is 1. }
 
-  \item{lag_params}{\eqn{q}{q} length vector of AR coefficients. For notations please see \code{arima}. Default value is 0.5. }
+  \item{lag_params}{\eqn{q}{q} length vector of AR coefficients. If the parameters need to be estimated from AR(q) process, should be
+                    any numeric vector of length q. For notations please see \code{arima}. Default value is 0.5. }
 
   \item{variance}{variance of the white noise in temporal error. }
 
@@ -124,7 +125,7 @@ b <- rho
 s <- sqrt(sigma.sq)
 eps = arima.sim(list(order = c(1,0,0), ar = b), n = n, rand.gen = rnorm, sd = s)
 
-y <- eps + 10*sin(pi * x[,1])
+y <- eps + 10*sin(pi * x)
 
 estimation_result <- RFGLS_estimate_timeseries(y, x, ntree = 10)
 
