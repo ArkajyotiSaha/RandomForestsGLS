@@ -34,7 +34,8 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
                identical (including intercept) with that of covariates provided for estimation purpose in \code{X}.
                If \code{NULL}, will use \code{X} as \code{Xtest}. Default value is \code{NULL}. }
 
-  \item{nrnodes}{The maximum number of nodes a tree can have. Default choice leads to the deepest tree contigent on \code{nthsize}. }
+    \item{nrnodes}{The maximum number of nodes a tree can have. Default choice leads to the deepest tree contigent on \code{nthsize}. For significantly large \eqn{n},
+                   one needs to bound it for growing shallow trees which trades off efficiency for computation time. }
 
   \item{nthsize}{Minimum size of leaf nodes. We recommend not setting this value too small, as that will lead to very deep trees
                  that takes a lot of time to be built and can produce unstable estimaes. Default value is 20. }
