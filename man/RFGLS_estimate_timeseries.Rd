@@ -54,7 +54,7 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
   \item{lag_params}{\eqn{q}{q} length vector of AR coefficients. If the parameters need to be estimated from AR(q) process, should be
                     any numeric vector of length q. For notations please see \code{arima}. Default value is 0.5. }
 
-  \item{variance}{variance of the white noise in temporal error. }
+  \item{variance}{variance of the white noise in temporal error. The function estimate is not affected by this. Default value is 1. }
 
   \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF with default options, will estimate
                         the coefficeints corresponding to \eqn{AR(q)} from \code{arima} with the option, \code{include.mean = FALSE}.
