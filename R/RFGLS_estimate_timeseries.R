@@ -2,6 +2,7 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
                                     ntree = 50, h = 1, lag_params = 0.5, variance = 1, param_estimate = FALSE, verbose = FALSE){
 
   n <- length(y)
+  sigma.sq <- variance
   nsample <- n
   if(is.null(nrnodes)){
     nrnodes <- 2 * nsample + 1
