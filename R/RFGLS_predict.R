@@ -3,7 +3,7 @@ RFGLS_predict <- function(RFGLS_out, Xtest, h = 1, verbose = FALSE){
   p <- ncol(Xtest)
   if(missing(Xtest)){stop("error: Xtest must be specified\n")}
   if(!any(is.data.frame(Xtest), is.matrix(Xtest))){stop("error: Xtest must be a data.frame or matrix\n")}
-  if(ncol(Xtest) != ncol(RFGLS_out$X)){ stop(paste("error: Xtest must have ",p," columns\n"))}
+  if(ncol(Xtest) != ncol(RFGLS_out$X)){ stop(paste("error: Xtest must have ",ncol(RFGLS_out$X)," columns\n"))}
 
   lDaughter <- RFGLS_out$RFGLS_object$ldaughter
   rDaughter <- RFGLS_out$RFGLS_object$rdaughter

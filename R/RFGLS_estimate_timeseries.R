@@ -7,10 +7,20 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
   if(is.null(nrnodes)){
     nrnodes <- 2 * nsample + 1
   }
+
+  if(is.null(Xtest)){
+    Xtest <- X
+  }
+  if(ncol(Xtest) != ncol(X)){ stop(paste("error: Xtest must have ",ncol(X)," columns\n"))}
+
+
   if(param_estimate){
-    sp <- randomForest(X, y)
+    sp <- randomForest(X, y,  nodesize = nthsize)
     sp_input_est <- predict(sp, X)
     rf_residual <- y - sp_input_est
+    if(verbose){
+      cat(paste(("----------------------------------------"), collapse="   "), "\n"); cat(paste(("\tParameter Estimation"), collapse="   "), "\n"); cat(paste(("----------------------------------------"), collapse="   "), "\n")
+    }
     AR <- arima(rf_residual, order = c(length(lag_params),0, 0), include.mean = FALSE)
     lag_params <- AR$coef
   }
@@ -47,34 +57,36 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
   storage.mode(treeSize) <- "integer"
   #pinv_choice <- 0
   storage.mode(pinv_choice) <- "integer"
-  if(is.null(Xtest)){
-    Xtest <- X
-  }
+
   ntest <- nrow(Xtest)
   storage.mode(ntest) <- "integer"
-  if(is.null(h)){h <- 4}
+  if(is.null(h)){h <- 1}
 
   q_lag <- length(lag_params)
   storage.mode(q_lag) <- "integer"
 
+  local_seed <- sample(.Random.seed, 1)
 
-  #out_rtree <- .Call("RFGLStree_treecpp", t(X), y, res_BF$B, res_BF$F, as.integer(res_BF$nnIndx), as.integer(res_BF$nnIndxLU), as.integer(res_Z$invZ_val), as.integer(res_Z$invZ_loc), mtry, n, p, nsample, nthsize, nrnodes, treeSize, pinv_choice, t(Xtest), ntest, n.omp.threads, q_lag)
-  #return(out_rtree)
+
+  if(verbose){
+    cat(paste(("----------------------------------------"), collapse="   "), "\n"); cat(paste(("\tRFGLS Model Fitting"), collapse="   "), "\n"); cat(paste(("----------------------------------------"), collapse="   "), "\n")
+  }
+
   if(h > 1){
     cl <- makeCluster(h)
     clusterExport(cl=cl, varlist=c("X", "y", "res_BF", "res_Z", "mtry", "n", "p",
                                    "nsample", "nthsize", "nrnodes", "treeSize", "pinv_choice", "Xtest", "ntest",
-                                   "n.omp.threads", "RFGLS_tree", "q"),envir=environment())
+                                   "n.omp.threads", "RFGLS_tree", "q", "local_seed"),envir=environment())
     if(verbose == TRUE){
       cat(paste(("----------------------------------------"), collapse="   "), "\n"); cat(paste(("\tRF Progress"), collapse="   "), "\n"); cat(paste(("----------------------------------------"), collapse="   "), "\n")
       pboptions(type = "txt", char = "=")
       result <- pblapply(1:ntree,RFGLS_tree, X, y, res_BF, res_Z, mtry, n, p,
                          nsample, nthsize, nrnodes, treeSize, pinv_choice, Xtest, ntest,
-                         n.omp.threads, q, cl = cl)
+                         n.omp.threads, q, local_seed, cl = cl)
     }
     if(verbose != TRUE){result <- parLapply(cl,1:ntree,RFGLS_tree, X, y, res_BF, res_Z, mtry, n, p,
                                             nsample, nthsize, nrnodes, treeSize, pinv_choice, Xtest, ntest,
-                                            n.omp.threads, q)}
+                                            n.omp.threads, q, local_seed)}
     stopCluster(cl)
   }
   if(h == 1){
@@ -83,16 +95,16 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
       pboptions(type = "txt", char = "=")
       result <- pblapply(1:ntree,RFGLS_tree, X, y, res_BF, res_Z, mtry, n, p,
                          nsample, nthsize, nrnodes, treeSize, pinv_choice, Xtest, ntest,
-                         n.omp.threads, q)
+                         n.omp.threads, q, local_seed)
     }
 
     if(verbose != TRUE){
       result <- lapply(1:ntree,RFGLS_tree, X, y, res_BF, res_Z, mtry, n, p,
                        nsample, nthsize, nrnodes, treeSize, pinv_choice, Xtest, ntest,
-                       n.omp.threads, q)
+                       n.omp.threads, q, local_seed)
     }
   }
-  #result_mat <- do.call(cbind, result)
+
   RFGLS_out <- list()
   RFGLS_out$P_matrix <- do.call(cbind, lapply(1:ntree, function(i) result[[i]]$P_index))
   RFGLS_out$predicted_matrix <- do.call(cbind, lapply(1:ntree, function(i) result[[i]]$ytest))

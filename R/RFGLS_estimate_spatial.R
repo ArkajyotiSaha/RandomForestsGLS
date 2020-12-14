@@ -7,11 +7,20 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
   if(is.null(nrnodes)){
     nrnodes <- 2 * nsample + 1
   }
+
+  if(is.null(Xtest)){
+    Xtest <- X
+  }
+  if(ncol(Xtest) != ncol(X)){ stop(paste("error: Xtest must have ",ncol(X)," columns\n"))}
+
   if(param_estimate){
-    sp <- randomForest(X, y)
+    sp <- randomForest(X, y, nodesize = nthsize)
     sp_input_est <- predict(sp, X)
     rf_residual <- y - sp_input_est
-    est_theta <- BRISC_estimation(coords, x = matrix(1,n,1), y = rf_residual, verbose = FALSE, cov.model = cov.model)
+    if(verbose){
+      cat(paste(("----------------------------------------"), collapse="   "), "\n"); cat(paste(("\tParameter Estimation"), collapse="   "), "\n"); cat(paste(("----------------------------------------"), collapse="   "), "\n")
+    }
+    est_theta <- BRISC_estimation(coords, x = matrix(1,n,1), y = rf_residual, verbose = verbose, cov.model = cov.model)
     sigma.sq <- est_theta$Theta[1]
     tau.sq <- est_theta$Theta[2]
     phi <- est_theta$Theta[3]
@@ -60,6 +69,10 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
   storage.mode(n.neighbors) <- "integer"
   storage.mode(verbose) <- "integer"
 
+  if(verbose){
+    cat(paste(("----------------------------------------"), collapse="   "), "\n"); cat(paste(("\tRFGLS Model Fitting"), collapse="   "), "\n"); cat(paste(("----------------------------------------"), collapse="   "), "\n")
+  }
+
   res_BF <- .Call("RFGLS_BFcpp", n, n.neighbors, coords, cov.model.indx, alpha.sq.starting, phi.starting, nu.starting, search.type.indx, n.omp.threads, verbose)
   res_Z <- .Call("RFGLS_invZcpp", as.integer(length(res_BF$nnIndxLU)/2), as.integer(res_BF$nnIndx), as.integer(res_BF$nnIndxLU), as.integer(rep(0, length(res_BF$nnIndxLU)/2)), as.integer(0*res_BF$nnIndx), as.integer(rep(0, length(res_BF$nnIndxLU)/2 + 1)), as.integer(rep(0, length(res_BF$nnIndxLU)/2)) )
 
@@ -79,32 +92,32 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
   storage.mode(treeSize) <- "integer"
   #pinv_choice <- 0
   storage.mode(pinv_choice) <- "integer"
-  if(is.null(Xtest)){
-    Xtest <- X
-  }
+
   ntest <- nrow(Xtest)
   storage.mode(ntest) <- "integer"
-  if(is.null(h)){h <- 4}
+  if(is.null(h)){h <- 1}
 
   q <- 0
   storage.mode(q) <- "integer"
+
+  local_seed <- sample(.Random.seed, 1)
 
 
   if(h > 1){
     cl <- makeCluster(h)
     clusterExport(cl=cl, varlist=c("X", "y", "res_BF", "res_Z", "mtry", "n", "p",
                                    "nsample", "nthsize", "nrnodes", "treeSize", "pinv_choice", "Xtest", "ntest",
-                                   "n.omp.threads", "RFGLS_tree", "q"),envir=environment())
+                                   "n.omp.threads", "RFGLS_tree", "q", "local_seed"),envir=environment())
     if(verbose == TRUE){
       cat(paste(("----------------------------------------"), collapse="   "), "\n"); cat(paste(("\tRF Progress"), collapse="   "), "\n"); cat(paste(("----------------------------------------"), collapse="   "), "\n")
       pboptions(type = "txt", char = "=")
       result <- pblapply(1:ntree,RFGLS_tree, X, y, res_BF, res_Z, mtry, n, p,
                          nsample, nthsize, nrnodes, treeSize, pinv_choice, Xtest, ntest,
-                         n.omp.threads, q, cl = cl)
+                         n.omp.threads, q, local_seed, cl = cl)
     }
     if(verbose != TRUE){result <- parLapply(cl,1:ntree,RFGLS_tree, X, y, res_BF, res_Z, mtry, n, p,
                                             nsample, nthsize, nrnodes, treeSize, pinv_choice, Xtest, ntest,
-                                            n.omp.threads, q)}
+                                            n.omp.threads, q, local_seed)}
     stopCluster(cl)
   }
   if(h == 1){
@@ -113,22 +126,23 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
       pboptions(type = "txt", char = "=")
       result <- pblapply(1:ntree,RFGLS_tree, X, y, res_BF, res_Z, mtry, n, p,
                          nsample, nthsize, nrnodes, treeSize, pinv_choice, Xtest, ntest,
-                         n.omp.threads, q)
+                         n.omp.threads, q, local_seed)
     }
 
     if(verbose != TRUE){
       result <- lapply(1:ntree,RFGLS_tree, X, y, res_BF, res_Z, mtry, n, p,
                        nsample, nthsize, nrnodes, treeSize, pinv_choice, Xtest, ntest,
-                       n.omp.threads, q)
+                       n.omp.threads, q, local_seed)
     }
   }
-  #result_mat <- do.call(cbind, result)
+
   RFGLS_out <- list()
   RFGLS_out$P_matrix <- do.call(cbind, lapply(1:ntree, function(i) result[[i]]$P_index))
   RFGLS_out$predicted_matrix <- do.call(cbind, lapply(1:ntree, function(i) result[[i]]$ytest))
   RFGLS_out$predicted <- rowMeans(RFGLS_out$predicted_matrix)
   RFGLS_out$X <- X
   RFGLS_out$y <- y
+  RFGLS_out$coords <- coords
   RFGLS_out$RFGLS_object <- list()
   RFGLS_out$RFGLS_object$ldaughter <- do.call(cbind, lapply(1:ntree, function(i) result[[i]]$lDaughter))
   RFGLS_out$RFGLS_object$rdaughter <- do.call(cbind, lapply(1:ntree, function(i) result[[i]]$rDaughter))
