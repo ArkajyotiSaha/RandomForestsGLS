@@ -57,8 +57,8 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
 
   \item{variance}{variance of the white noise in temporal error. The function estimate is not affected by this. Default value is 1. }
 
-  \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF with default options, will estimate
-                        the coefficeints corresponding to \eqn{AR(q)} from \code{arima} with the option, \code{include.mean = FALSE}.
+  \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF default options and 'nodesize = \code{nthsize}',
+                        will estimate the coefficeints corresponding to \eqn{AR(q)} from \code{arima} with the option, \code{include.mean = FALSE}.
                         Default value is \code{FALSE}. }
 
   \item{verbose}{if TRUE, model specifications along with information regarding OpenMP support and progress of the algorithm
