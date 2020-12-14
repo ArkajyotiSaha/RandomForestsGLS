@@ -14,15 +14,12 @@
 }
 
 \usage{
-RFGLS_predict_spatial <- function(RFGLS_out, coords, coords.0, Xtest, h = 1, verbose = FALSE)
+RFGLS_predict_spatial <- function(RFGLS_out, coords.0, Xtest, h = 1, verbose = FALSE)
 }
 
 \arguments{
 
   \item{RFGLS_out}{An object obtained from \code{RFGLS_estimate_spatial} or \code{RFGLS_estimate_timeseries}. }
-
-  \item{coords}{the \eqn{n \times 2}{n x 2} matrix of the observation
-  coordinates in \eqn{R^2}{R^2} (e.g., easting and northing). }
 
   \item{coords.0}{the spatial coordinates corresponding to prediction locations. Its structure should be same as that of coords
                   in \code{BRISC_estimation}. Default value is a column of \eqn{1} to adjust for the mean(intercept). }
@@ -35,7 +32,7 @@ RFGLS_predict_spatial <- function(RFGLS_out, coords, coords.0, Xtest, h = 1, ver
            Default value is 1. }
 
   \item{verbose}{if TRUE, model specifications along with information regarding OpenMP support and progress of the algorithm
-                 is printed to the screen. Otherwise, nothing is printed to the screen. Default value is FALSE. }
+                 is printed to the screen. Otherwise, nothing is printed to the screen. Default value is \code{FALSE}. }
 }
 
 \value{
@@ -96,7 +93,7 @@ w <- rmvn(1, rep(0,n), sigma.sq*R)
 y <- rnorm(n, 10*sin(pi * x) + w, sqrt(tau.sq))
 
 estimation_result <- RFGLS_estimate_spatial(coords[1:200,], y[1:200], matrix(x[1:200,],200,1), ntree = 10)
-prediction_result <- RFGLS_predict_spatial(estimation_result, coords[1:200,], coords[201:250,], matrix(x[201:250,],50,1))
+prediction_result <- RFGLS_predict_spatial(estimation_result, coords[201:250,], matrix(x[201:250,],50,1))
 
 }
 

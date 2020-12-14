@@ -34,7 +34,7 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
                identical (including intercept) with that of covariates provided for estimation purpose in \code{X}.
                If \code{NULL}, will use \code{X} as \code{Xtest}. Default value is \code{NULL}. }
 
-    \item{nrnodes}{The maximum number of nodes a tree can have. Default choice leads to the deepest tree contigent on \code{nthsize}. For significantly large \eqn{n},
+  \item{nrnodes}{The maximum number of nodes a tree can have. Default choice leads to the deepest tree contigent on \code{nthsize}. For significantly large \eqn{n},
                    one needs to bound it for growing shallow trees which trades off efficiency for computation time. }
 
   \item{nthsize}{Minimum size of leaf nodes. We recommend not setting this value too small, as that will lead to very deep trees
@@ -74,12 +74,12 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
                      "tree" and "brute". Both of them provide the same result, though "tree" should be faster.
                      Default value is "tree". }
 
-    \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF with default options, will estimate
-                        the coefficeints corresponding to \code{cov.model} from \code{BRISC_estimate} with the deafult options.
+  \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF with default options and 'nodesize = \code{nthsize}',
+                        will estimate the coefficeints corresponding to \code{cov.model} from \code{BRISC_estimate} with the deafult options.
                         Default value is \code{FALSE}. }
 
   \item{verbose}{if TRUE, model specifications along with information regarding OpenMP support and progress of the algorithm
-                 is printed to the screen. Otherwise, nothing is printed to the screen. Default value is FALSE. }
+                 is printed to the screen. Otherwise, nothing is printed to the screen. Default value is \code{FALSE}. }
 }
 
 \value{
@@ -97,6 +97,8 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
   \item{X}{the matrix \code{X}. }
 
   \item{y}{the vector \code{y}. }
+
+  \item{coords}{the matrix \code{coords}. }
 
   \item{RFGLS_Object}{Object required for prediction. }
 

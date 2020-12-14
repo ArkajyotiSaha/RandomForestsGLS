@@ -27,7 +27,7 @@ RFGLS_predict  <- function(RFGLS_out, Xtest, h = 1, verbose = FALSE)
            Default value is 1. }
 
   \item{verbose}{if TRUE, model specifications along with information regarding OpenMP support and progress of the algorithm
-                 is printed to the screen. Otherwise, nothing is printed to the screen. Default value is FALSE. }
+                 is printed to the screen. Otherwise, nothing is printed to the screen. Default value is \code{FALSE}. }
 }
 
 \value{
