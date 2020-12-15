@@ -13,19 +13,19 @@ RFGLS_predict <- function(RFGLS_out, Xtest, h = 1, verbose = FALSE){
   mbest <- RFGLS_out$RFGLS_object$mbest
   ntree <- ncol(RFGLS_out$RFGLS_object$ldaughter)
 
-  if(is.null(h)){h <- 4}
+  if(is.null(h)){h <- 1}
 
 
   if(h > 1){
     cl <- makeCluster(h)
-    clusterExport(cl=cl, varlist=c("Xtest", "ntest", "p", "lDaughter", "rDaughter", "nodestatus", "upper", "avnode", "mbest", "rfglspredict_tree"),envir=environment())
+    clusterExport(cl=cl, varlist=c("Xtest", "ntest", "p", "lDaughter", "rDaughter", "nodestatus", "upper", "avnode", "mbest", "RFGLS_predict_tree"),envir=environment())
     if(verbose == TRUE){
       cat(paste(("----------------------------------------"), collapse="   "), "\n"); cat(paste(("\tRF Prediction Progress"), collapse="   "), "\n"); cat(paste(("----------------------------------------"), collapse="   "), "\n")
       pboptions(type = "txt", char = "=")
-      result <- pblapply(1:ntree,rfglspredict_tree, Xtest, ntest, p, lDaughter, rDaughter, nodestatus,
+      result <- pblapply(1:ntree,RFGLS_predict_tree, Xtest, ntest, p, lDaughter, rDaughter, nodestatus,
                          upper, avnode, mbest, cl = cl)
     }
-    if(verbose != TRUE){result <- parLapply(cl,1:ntree,rfglspredict_tree, Xtest, ntest, p, lDaughter,
+    if(verbose != TRUE){result <- parLapply(cl,1:ntree,RFGLS_predict_tree, Xtest, ntest, p, lDaughter,
                                             rDaughter, nodestatus, upper, avnode, mbest)}
     stopCluster(cl)
   }
