@@ -30,6 +30,6 @@ Some code blocks are borrowed from the R packages: spNNGP: Spatial Regression Mo
 
 
 ## Citation
-Please cite the following paper when you use RFGLS
+Please cite the following paper when you use RF-GLS
 
 Saha A, Basu S, Datta A. Random Forests for dependent data. arXiv preprint arXiv:2007.15421. 2020 Jul 30.
