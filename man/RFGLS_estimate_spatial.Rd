@@ -4,9 +4,9 @@
 
 \description{
   The function \code{RFGLS_estimate_spatial} fits univariate non-linear spatial regression models for
-  spatial data using a RF-GLS. \code{RFGLS_estimate_spatial} uses the sparse Cholesky representation
+  spatial data using RF-GLS in Saha et al. 2020. \code{RFGLS_estimate_spatial} uses the sparse Cholesky representation
   of Vecchia’s likelihood (Vecchia, 1988) developed in Datta et al., 2016 and Saha & Datta, 2018.
-  The fitted Random Forest (RF) model is used later for prediction via the \code{RFGLS-predict}.
+  The fitted Random Forest (RF) model is used later for prediction via the \code{RFGLS_predict}.
 
   Some code blocks are borrowed from the R packages: spNNGP:
   Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes
@@ -16,9 +16,11 @@
 }
 
 \usage{
-RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20, mtry = 1, pinv_choice = 1, n_omp = 1, ntree = 50, h = 1,
-                                   sigma.sq = 1, tau.sq = 0.1, phi = 5, nu = 0.5, n.neighbors = 15, cov.model = "exponential", search.type = "tree",
-                                   param_estimate = FALSE, verbose = FALSE)
+RFGLS_estimate_spatial(coords, y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20, mtry = 1,
+                       pinv_choice = 1, n_omp = 1, ntree = 50, h = 1, sigma.sq = 1,
+                       tau.sq = 0.1, phi = 5, nu = 0.5, n.neighbors = 15,
+                       cov.model = "exponential", search.type = "tree",
+                       param_estimate = FALSE, verbose = FALSE)
 }
 
 \arguments{
@@ -60,7 +62,7 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
 
   \item{tau.sq}{value of tau square. Default value is 0.1. }
 
-  \item{phi}{value of phi. Default value is 1. }
+  \item{phi}{value of phi. Default value is 5. }
 
   \item{nu}{value of nu, only required for matern covariance model. Default value is 0.5. }
 
@@ -74,37 +76,37 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
                      "tree" and "brute". Both of them provide the same result, though "tree" should be faster.
                      Default value is "tree". }
 
-  \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF with default options and 'nodesize = \code{nthsize}',
+  \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF with default options and \code{nodesize = nthsize},
                         will estimate the coefficeints corresponding to \code{cov.model} from \code{BRISC_estimate} with the deafult options.
                         Default value is \code{FALSE}. }
 
-  \item{verbose}{if TRUE, model specifications along with information regarding OpenMP support and progress of the algorithm
+  \item{verbose}{if \code{TRUE}, model specifications along with information regarding OpenMP support and progress of the algorithm
                  is printed to the screen. Otherwise, nothing is printed to the screen. Default value is \code{FALSE}. }
 }
 
 \value{
   A list comprising:
 
-  \item{P_matrix}{an \eqn{n \times ntree}{n x ntree} matrix of zero indexed resamples. \code{t}-th column denote the
-                  \code{n} resamples used in the \code{t}-th tree. }
+  \item{P_matrix}{an \eqn{n \times ntree}{n x ntree} matrix of zero indexed resamples. t-th column denote the
+                  \eqn{n} resamples used in the t-th tree. }
 
-  \item{predicted_matrix}{an \eqn{ntest \times ntree}{n x ntree} matrix of predictions. \code{t}-th column denote the
-                          predictions at \code{ntest} datapoints obtained from the \code{t}-th tree. }
+  \item{predicted_matrix}{an \eqn{ntest \times ntree}{ntest x ntree} matrix of predictions. t-th column denote the
+                          predictions at \eqn{ntest} datapoints obtained from the t-th tree. }
 
-  \item{predicted}{preducted values at the \code{ntest} prediction points. Average (\code{rowMeans}) of the treewise predctions
+  \item{predicted}{preducted values at the \eqn{ntest} prediction points. Average (\code{rowMeans}) of the treewise predctions
                    in \code{predicted_matrix}, }
 
   \item{X}{the matrix \code{X}. }
 
   \item{y}{the vector \code{y}. }
 
-  \item{coords}{the matrix \code{coords}. }
-
   \item{RFGLS_Object}{Object required for prediction. }
 
 }
 
 \references{
+  Saha, A., Basu, S., & Datta, A. (2020). Random Forests for dependent data. arXiv preprint arXiv:2007.15421.
+
   Saha, A., & Datta, A. (2018). BRISC: bootstrap for rapid inference on spatial
   covariances. Stat, e184, DOI: 10.1002/sta4.184.
 
@@ -125,6 +127,7 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
 
 \author{
   Arkajyoti Saha \email{arkajyotisaha93@gmail.com}, \cr
+  Sumanta Basu \email{sumbose@cornell.edu}, \cr
   Abhirup Datta \email{abhidatta@jhu.edu}
 }
 

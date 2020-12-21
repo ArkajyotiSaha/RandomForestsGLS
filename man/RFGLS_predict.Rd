@@ -1,10 +1,10 @@
 \name{RFGLS_predict}
 \alias{RFGLS_predict}
-\title{Prediction of function value with RF-GLS}
+\title{Prediction of mean function with RF-GLS}
 
 \description{
-  The function \code{RFGLS_predict} predicts the functional value at a given set of covariates.
-  It uses a fitted RF-GLS model to obtain the predictions.
+  The function \code{RFGLS_predict} predicts the mean function at a given set of covariates.
+  It uses a fitted RF-GLS model in Saha et al. 2020 to obtain the predictions.
 
   Some code blocks are borrowed from the R package: randomForest: Breiman and Cutler's Random
   Forests for Classification and Regression https://CRAN.R-project.org/package=randomForest .
@@ -12,7 +12,7 @@
 }
 
 \usage{
-RFGLS_predict  <- function(RFGLS_out, Xtest, h = 1, verbose = FALSE)
+RFGLS_predict(RFGLS_out, Xtest, h = 1, verbose = FALSE)
 }
 
 \arguments{
@@ -21,27 +21,29 @@ RFGLS_predict  <- function(RFGLS_out, Xtest, h = 1, verbose = FALSE)
 
   \item{Xtest}{an \eqn{ntest \times p}{ntest x p} matrix of covariates for prediction. Its Structure should be
                identical (including intercept) with that of covariates provided for estimation purpose in \code{X}
-               in RFGLS_out. }
+               in \code{RFGLS_out}. }
 
-  \item{h}{Number of core to be used in parallel computing setup for bootstrap samples. If h = 1, there is no parallelization.
+  \item{h}{Number of core to be used in parallel computing setup for bootstrap samples. If \code{h = 1}, there is no parallelization.
            Default value is 1. }
 
-  \item{verbose}{if TRUE, model specifications along with information regarding OpenMP support and progress of the algorithm
+  \item{verbose}{if \code{TRUE}, model specifications along with information regarding OpenMP support and progress of the algorithm
                  is printed to the screen. Otherwise, nothing is printed to the screen. Default value is \code{FALSE}. }
 }
 
 \value{
   A list comprising:
 
-  \item{predicted_matrix}{an \eqn{ntest \times ntree}{n x ntree} matrix of predictions. \code{t}-th column denote the
-                          predictions at \code{ntest} datapoints obtained from the \code{t}-th tree. }
+  \item{predicted_matrix}{an \eqn{ntest \times ntree}{ntest x ntree} matrix of predictions. t-th column denote the
+                          predictions at \eqn{ntest} datapoints obtained from the t-th tree. }
 
-  \item{predicted}{preducted values at the \code{ntest} prediction points. Average (\code{rowMeans}) of the treewise predctions
+  \item{predicted}{preducted values at the \eqn{ntest} prediction points. Average (\code{rowMeans}) of the treewise predctions
                    in \code{predicted_matrix} }
 
 }
 
 \references{
+  Saha, A., Basu, S., & Datta, A. (2020). Random Forests for dependent data. arXiv preprint arXiv:2007.15421.
+
   Andy Liaw, and Matthew Wiener (2015). randomForest: Breiman and Cutler's Random
   Forests for Classification and Regression. R package version 4.6-14.
   https://CRAN.R-project.org/package=randomForest
@@ -50,6 +52,7 @@ RFGLS_predict  <- function(RFGLS_out, Xtest, h = 1, verbose = FALSE)
 
 \author{
   Arkajyoti Saha \email{arkajyotisaha93@gmail.com}, \cr
+  Sumanta Basu \email{sumbose@cornell.edu}, \cr
   Abhirup Datta \email{abhidatta@jhu.edu}
 }
 

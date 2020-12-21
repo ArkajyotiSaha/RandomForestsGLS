@@ -47,15 +47,15 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
   p <- ncol(X)
   storage.mode(p) <- "integer"
   storage.mode(nsample) <- "integer"
-  #nthsize <- 20
+
   storage.mode(nthsize) <- "integer"
 
   storage.mode(nrnodes) <- "integer"
-  #mtry <- 1
+
   storage.mode(mtry) <- "integer"
   treeSize <- 0
   storage.mode(treeSize) <- "integer"
-  #pinv_choice <- 0
+
   storage.mode(pinv_choice) <- "integer"
 
   ntest <- nrow(Xtest)

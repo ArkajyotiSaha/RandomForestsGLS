@@ -1,4 +1,5 @@
-RandomForestsGLS
+
+# RandomForestsGLS
 ====
 
 ## Overview
@@ -6,7 +7,7 @@ RandomForestsGLS: Random Forests for dependent data: Fits non-linear regression 
 
 
 ## Installation
-In order to download the package, please run the following command in R:
+In order to install the development version of the package, please run the following command in R:
 
 ```{r }
 if (!require("devtools")) install.packages("devtools")
@@ -17,12 +18,9 @@ devtools::install_github("ArkajyotiSaha/RandomForestsGLS", ref ="HEAD")
 For help on the functions in Brisc please use the following:
 ```{r }
 ?RFGLS_estimate_spatial #(for estimation in spatial data)
-
-?RFGLS_estimate_timeseries #(for estimation in temporal data)
-
-?RFGLS_predict #(for prediction)
-
-?RFGLS_predict_spatial #(for spatial prediction)
+?RFGLS_estimate_timeseries #(for estimation in timeseries data)
+?RFGLS_predict #(for prediction of mean functtion)
+?RFGLS_predict_spatial #(for prediction of Spatial Response)
 ```
 
 ## Vignette
@@ -35,4 +33,5 @@ Some code blocks are borrowed from the R packages: spNNGP: Spatial Regression Mo
 ## Citation
 Please cite the following paper when you use RF-GLS
 
-Saha A, Basu S, Datta A. Random Forests for dependent data. arXiv preprint arXiv:2007.15421. 2020 Jul 30.
+Saha, A., Basu, S., & Datta, A. (2020). Random Forests for dependent data. arXiv preprint arXiv:2007.15421.
+

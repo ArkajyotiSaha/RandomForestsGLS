@@ -51,7 +51,6 @@ void updateBF_org(double *B, double *F, double *c, double *C, double *D, double 
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
 #endif
-    //theta[0] = alphasquareIndex, theta[1] = phiIndex, theta[2] = nuIndex (in case of 'matern')
     if(i > 0){
       for(k = 0; k < nnIndxLU[n+i]; k++){
         c[nnIndxLU[i]+k] = spCor(d[nnIndxLU[i]+k], theta[1], nu, covModel, &bk[threadID*nb]);
@@ -166,7 +165,6 @@ double* pinv_dgelsy_beta_cpp(double *A, double *b, int nrowA, int ncolA){
   iwork = (int *) R_alloc(liwork, sizeof(int));
   work = (double *) R_alloc(lwork, sizeof(double));
   F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, work, &lwork, &info);
-  //Rprintf(" after findBestSplit: beta_0=%f, beta_1=%f, beta_2=%f, X0_0=%f, X0_1=%f\n", y0[0], y0[1], y0[2], X0[0], X0[1]);
 
   return(y0);
 
@@ -354,7 +352,6 @@ extern "C" {
     SEXP j_r; PROTECT(j_r = allocVector(INTSXP, 1)); nProtect++; INTEGER(j_r)[0] = j;
 
     SEXP D_r; PROTECT(D_r = allocVector(REALSXP, j)); nProtect++; double *D = REAL(D_r);
-    //double *D = (double *) R_alloc(j, sizeof(double));
 
     for(i = 0; i < n; i++){
       for(k = 0; k < nnIndxLU[n+i]; k++){
@@ -425,9 +422,10 @@ extern "C" {
   }
   //invP_val = contains inverse of P. is of nsample length
   //invP_loc[i,i+1] = starting and ending location of invP(i). is of n+1 length.
-  //invZ_val = contains inverse of nn mapping for every i. May be or arbitrary length.
+  //invZ_val = contains inverse of nn mapping for every i.
   //invZ_loc[i,i+1] = starting and ending location of invZ(i). is of n+1 length.
-  //double *PQZ is a n x t_n length vector (a matrix, entered as vector)
+  //double *PQZ is a n x t_n length vector (a matrix, entered as vector).
+
   void PQZ_update(int *P, int *Z, int *invP_val, int *invP_loc, double *B, double *F, int *nnIndx, int *nnIndxLU, int n, int rc, double *PQZ){
     int i, j, l, t, temp_t;
     double tt_1, tt_2;
@@ -467,8 +465,7 @@ extern "C" {
   }
 
   SEXP RFGLS_invZcpp(SEXP n_r, SEXP nnIndx_r, SEXP nnIndxLU_r, SEXP invZ_freq_r, SEXP invZ_val_r, SEXP invZ_loc_r, SEXP i_loc_r){
-    //same vetor length as nnindx. copy it.
-    //use definition of Q
+
     int n = INTEGER(n_r)[0];
     int *nnIndx = INTEGER(nnIndx_r);
     int *nnIndxLU = INTEGER(nnIndxLU_r);
@@ -478,7 +475,6 @@ extern "C" {
     int i, j;
     int *i_loc = INTEGER(i_loc_r);
 
-    //Cannot use multithread, as invZ_freq is changed in every thread, together. Cannot be written as a reduction.
 
     for(i = 0; i < n; i++){
       for(j = 0; j < nnIndxLU[n+i]; j++){
@@ -556,27 +552,22 @@ extern "C" {
     double tt_1;
 
     int PQy_length = nsample;
-    //Rprintf(" after PQZ update: PQy_length=%d, PQZ_length=%d\n", PQy_length, PQZ_length);
+
 
     /* START BIG LOOP */
     msplit = -1;
     decsplit = 0.0;
-    //critmax = arma::datum::inf;
+    //critmax = arma::datum::inf; for convenience, use a very large number
     critmax = 10000000000;
-    //decsplit = critmax;
-    //critmax = std::numeric_limits<double>::infinity();
     ubestt = 0.0;
 
     for (i=0; i < mdim; ++i) mind[i] = i;
 
     last = mdim - 1;
     tieVar = 1;
-    //call dgelsy for workspace queary.
-    //assign memory.
-    //assign to multiple threads. If possible, with private
 
     for(i = 0; i < mtry; ++i){
-      //critvar = std::numeric_limits<double>::infinity();
+      //critvar = std::numeric_limits<double>::infinity(); for convenience, use a very large number
       critvar = 10000000000;
       j = (int) (unif_rand() * (last+1));
       kv = mind[j];
@@ -590,7 +581,7 @@ extern "C" {
 
       F77_NAME(dcopy)(&PQZ_length, PQZ, &inc, PQZ_local, &inc);
       F77_NAME(dcopy)(&PQy_length, PQy, &inc, PQy_local, &inc);
-      //Rprintf(" after PQZ update: PQZ_1=%f, PQZ_2=%f, PQZ_3=%f\n", PQZ_local[0], PQZ_local[1], PQZ_local[PQZ_length-1]);
+
 
       //copy the x data in this node
       for (j = ndstart; j <= ndend; ++j) {
@@ -603,9 +594,9 @@ extern "C" {
       for (j = 1; j <= n; ++j) ncase[j - 1] = j;
 
       R_qsort_I(v, ncase, ndstart + 1, ndend + 1);
-      //Rprintf("regTree: crit=%d, critvar=%d, critmax=%d, index=%d, n_r=%d, n_l=%d\n", yl_index[ncase[ndstart] - 1], yl_index[ncase[ndstart+1] - 1], yl_index[ncase[ndstart+2] - 1], yl_index[ncase[ndstart+3] - 1], yl_index[ndend], yl_index[ndstart]);
+
       if (v[ndstart] >= v[ndend]) continue;
-      //crit = std::numeric_limits<double>::infinity();
+      //crit = std::numeric_limits<double>::infinity(); for convenience, use a very large number
       crit = 10000000000;
       nwhole_l = 0;
       nwhole_r = npop_tot;
@@ -618,7 +609,7 @@ extern "C" {
         if(temp_t > 0){
           nwhole_l = nwhole_l + temp_t;
           nwhole_r = nwhole_r - temp_t;
-          //Rprintf("regTree: nwhole_l=%d, nwhole_r=%d\n", nwhole_l, nwhole_r);
+
           l = rc;
           tt_1 = 0;
           for(ji = 0; ji < nnIndxLU[n+temp_i]; ji++){
@@ -637,11 +628,7 @@ extern "C" {
             PQZ_local[n*l + invP_val[invP_loc[temp_i]+t] ] = (0 - tt_1)/sqrt(F[temp_i]);
           }
         }
-        //Rprintf(" after PQZ update: PQZ_1=%f, PQZ_2=%f, PQZ_3=%f\n", PQZ_local[0], PQZ_local[1], PQZ_local[PQZ_length-1]);
-        //if (nwhole_r == 0) break;
-        //if (nwhole_l == 0) continue;
-        //call dgelsy directly.
-        //Rprintf("regTree: v_j=%f, v_{j+1}=%f\n", v[j], v[j+1]);//OK
+
         if (v[j] < v[j+1]) {
           if(nwhole_l == 0){
             crit = 10000000000;
@@ -657,7 +644,7 @@ extern "C" {
               crit = pinv_dgelsd_rss_cpp(PQZ_local, PQy_local, nsample, rc+1)/nsample;
             }
           }
-          //Rprintf("regTree: crit=%f, critvar=%f, critmax=%f, index=%d, n_r=%d, n_l=%d\n", crit, critvar, critmax, temp_i, nwhole_r, nwhole_l);
+
           if (crit < critvar) {
             ubestt = (v[j] + v[j+1]) / 2.0;
             critvar = crit;
@@ -673,7 +660,7 @@ extern "C" {
         }
       }
 
-      //if(critvar < 10000000000){
+
       if (critvar < critmax) {
         ubest = ubestt;
         msplit = kv + 1;
@@ -723,7 +710,7 @@ extern "C" {
 
     }
     else jstat = 1;
-    //Rprintf("the value of col_min : %f and value %f and msplit is %i jstat is %i critvar is %f critmax is %f\n", new_test, decsplit, msplit, jstat, critvar, critmax);
+
     free(ut);
     free(xt);
     free(v);
@@ -754,284 +741,6 @@ extern "C" {
   }
 
   //basic structure of RFtree
-  SEXP RFGLStree_treecpp(SEXP X_r, SEXP y_r, SEXP B_r, SEXP F_r, SEXP nnIndx_r, SEXP nnIndxLU_r, SEXP invZ_val_r, SEXP invZ_loc_r,
-                         SEXP mtry_r, SEXP n_r, SEXP p_r, SEXP nsample_r, SEXP nthsize_r, SEXP nrnodes_r, SEXP treeSize_r, SEXP pinv_choice_r, SEXP Xtest_r, SEXP ntest_r, SEXP nThreads_r, SEXP q_r){
-    double *X = REAL(X_r);
-    double *y = REAL(y_r);
-    double *B = REAL(B_r);
-    double *F = REAL(F_r);
-    int *nnIndx = INTEGER(nnIndx_r);
-    int *nnIndxLU = INTEGER(nnIndxLU_r);
-    int *invZ_val = INTEGER(invZ_val_r);
-    int *invZ_loc = INTEGER(invZ_loc_r);
-    int mtry = INTEGER(mtry_r)[0];
-    int n = INTEGER(n_r)[0];
-    int p = INTEGER(p_r)[0];
-    int nsample = INTEGER(nsample_r)[0];
-    int nthsize = INTEGER(nthsize_r)[0];
-    int nrnodes = INTEGER(nrnodes_r)[0];
-    int treeSize = INTEGER(treeSize_r)[0];
-    int pinv_choice = INTEGER(pinv_choice_r)[0];
-    double *Xtest = REAL(Xtest_r);
-    int ntest = INTEGER(ntest_r)[0];
-    int nThreads = INTEGER(nThreads_r)[0];
-    int q = INTEGER(q_r)[0];
-
-
-    //assign memories
-
-    int nProtect = 0;
-
-    //int *P_index = (int *) R_alloc (nsample, sizeof(int));
-    SEXP P_index_r; PROTECT(P_index_r = allocVector(INTSXP, nsample)); nProtect++; int *P_index = INTEGER(P_index_r);
-    //int *invP_freq = (int *) R_alloc (n, sizeof(int));
-    SEXP invP_freq_r; PROTECT(invP_freq_r = allocVector(INTSXP, n)); nProtect++; int *invP_freq = INTEGER(invP_freq_r);
-    //int *invP_loc = (int *) R_alloc (n, sizeof(int));
-    SEXP invP_loc_r; PROTECT(invP_loc_r = allocVector(INTSXP, (n + 1) )); nProtect++; int *invP_loc = INTEGER(invP_loc_r);
-    //int *invP_val = (int *) R_alloc (n, sizeof(int));
-    SEXP invP_val_r; PROTECT(invP_val_r = allocVector(INTSXP, n)); nProtect++; int *invP_val = INTEGER(invP_val_r);
-    int *i_loc = (int *) R_alloc (n, sizeof(int));
-    //SEXP i_loc_r; PROTECT(i_loc_r = allocVector(INTSXP, n)); nProtect++; int *i_loc = INTEGER(i_loc_r);
-    int i, k, l;
-    double xrand;
-    int *lDaughter = (int *) R_alloc (nrnodes, sizeof(int));
-    int *rDaughter = (int *) R_alloc (nrnodes, sizeof(int));
-    //int *varUsed = (int *) R_alloc (p, sizeof(int));
-    SEXP nodestatus_r; PROTECT(nodestatus_r = allocVector(INTSXP, nrnodes)); nProtect++; int *nodestatus = INTEGER(nodestatus_r);
-    //int *nodestatus = (int *) R_alloc (nrnodes, sizeof(int));
-    int *nodestart = (int *) R_alloc (nrnodes, sizeof(int));
-    int *nodepop = (int *) R_alloc (nrnodes, sizeof(int));
-    int *mbest = (int *) R_alloc (nrnodes, sizeof(int));
-    double *upper = (double *) R_alloc (nrnodes, sizeof(double));
-    SEXP avnode_number_r; PROTECT(avnode_number_r = allocVector(INTSXP, nrnodes)); nProtect++; int *avnode_number = INTEGER(avnode_number_r);
-    //int *avnode_number = (int *) R_alloc (nrnodes, sizeof(int));
-    for(int avcount = 0; avcount < nrnodes; avcount++){
-      avnode_number[avcount] = -99;
-    }
-    SEXP avnode_r; PROTECT(avnode_r = allocVector(REALSXP, nrnodes)); nProtect++; double *avnode = REAL(avnode_r);
-    //double *avnode = (double *) R_alloc (nrnodes, sizeof(double));
-    //int pinv_choice;
-
-    for(l = 0; l < nrnodes; l++){
-      lDaughter[l]  = 0;
-      rDaughter[l] = 0;
-      upper[l]  = 0;
-      avnode[l] = 0;
-      nodestatus[l] = 0;
-      mbest[l] = 0;
-    }
-
-    for(i = 0; i < nsample; i++){
-      invP_freq[i] = 0;
-    }
-
-    //Sampling with replacement
-    GetRNGstate();
-    for (i = 0; i < nsample; i++) {
-      xrand = unif_rand();
-      k = xrand * (n - q) + q;
-      P_index[i] = k;
-      invP_freq[k] = invP_freq[k] + 1;
-    }
-    int cumul_count = 0;
-    invP_loc[0] = 0;
-    for(i = 1; i < n; i++){
-      cumul_count += invP_freq[i-1];
-      invP_loc[i] = cumul_count;
-    }
-    invP_loc[n] = cumul_count + invP_freq[n-1];
-
-    for(i = 0; i < n; i++){
-      i_loc[i] = 0;
-    }
-
-    for(i = 0; i < nsample; i++){
-      invP_val[invP_loc[P_index[i]] + i_loc[P_index[i]]] = i;
-      i_loc[P_index[i]] = i_loc[P_index[i]] + 1;
-    }
-
-    //SEXP nodestart_r; PROTECT(nodestart_r = allocVector(INTSXP, nrnodes)); nProtect++; int *nodestart = INTEGER(nodestart_r);
-    //SEXP nodepop_r; PROTECT(nodepop_r = allocVector(INTSXP, nrnodes)); nProtect++; int *nodepop = INTEGER(nodepop_r);
-    //int *Z_index = (int *) R_alloc (nsample, sizeof(int));
-    //int *jdex = (int *) R_alloc (n, sizeof(int));
-    SEXP jdex_r; PROTECT(jdex_r = allocVector(INTSXP, n)); nProtect++; int *jdex = INTEGER(jdex_r);
-    SEXP Z_index_r; PROTECT(Z_index_r = allocVector(INTSXP, n)); nProtect++; int *Z_index = INTEGER(Z_index_r);
-    //int *Z_index = (int *) R_alloc (n, sizeof(int));
-    //double *PQy = (double *) R_alloc (nsample, sizeof(double));
-    SEXP PQy_r; PROTECT(PQy_r = allocVector(REALSXP, nsample)); nProtect++; double *PQy = REAL(PQy_r);
-    //double *PQZ;
-
-
-    PQy_update(P_index, y, invP_val, invP_loc, B, F, nnIndx, nnIndxLU, n, PQy);
-
-
-    int ncur, ndstart, ndend, ndendl, nodecnt, jstat, msplit = 0;
-    double decsplit, ubest;
-    int npopl = n, npopr = 0;
-
-    for (i = 1; i <= n; ++i){
-      jdex[i-1] = i;
-      Z_index[i-1] = 0;
-    }
-
-    ncur = 0;
-    nodestart[0] = 0;
-    nodepop[0] = n;
-    nodestatus[0] = NODE_TOSPLIT;
-    int PQZ_length;
-
-    int rc = 1;
-    //PQZ_length = nsample * (rc + 1);
-    //SEXP PQZ_r; PROTECT(PQZ_r = allocMatrix(REALSXP, nsample, (rc+1))); nProtect++; double *PQZ = REAL(PQZ_r);
-    double *PQZ;
-    //PQZ = (double *) realloc (PQZ, PQZ_length * sizeof(double));
-    for (k = 0; k < nrnodes - 2; ++k){
-      if (k > ncur || ncur >= nrnodes - 2) break;
-      /* skip if the node is not to be split */
-      if (nodestatus[k] != NODE_TOSPLIT) continue;
-
-      /* initialize for next call to findbestsplit */
-
-      ndstart = nodestart[k];
-      ndend = ndstart + nodepop[k] - 1;
-      nodecnt = nodepop[k];
-      jstat = 0;
-      decsplit = 0.0;
-      PQZ_length = nsample * (rc + 1);
-      PQZ = (double *) malloc (PQZ_length * sizeof(double));
-      //PQZ = (double *) realloc (PQZ, PQZ_length * sizeof(double));
-      //double *PQZ = (double *) calloc (PQZ_length, sizeof(double));
-      PQZ_update(P_index, Z_index, invP_val, invP_loc, B, F, nnIndx, nnIndxLU, n, (rc+1), PQZ);
-      //Rprintf(" after PQZ update: PQZ_1=%f, PQZ_2=%f, PQZ_3=%d\n", PQZ[0], PQZ[1], PQZ_length);
-      //pinv_choice = 1;
-      //Rprintf("before findBestSplit: ndstart=%d, ndend=%d, jstat=%d, decsplit=%f\n", ndstart, ndend, jstat, decsplit);
-      findBestSplit(X, n, jdex, p, nsample, ndstart, ndend, msplit, decsplit, ubest, ndendl, jstat, mtry, nodecnt, Z_index, rc, invP_val,
-                    invP_loc, invZ_val, invZ_loc, PQZ, PQy, B, F, nnIndx, nnIndxLU, pinv_choice);
-      //Rprintf(" after findBestSplit: ndstart=%d, ndendl=%d, jstat=%d, decsplit=%f, msplit=%d\n", ndstart, ndendl, jstat, decsplit, msplit);
-
-
-      if (jstat == 1) {
-        /* Node is terminal: Mark it as such and move on to the next. */
-        nodestatus[k] = NODE_TERMINAL;
-        avnode_number[k] = Z_index[jdex[nodestart[k]] - 1];
-        continue;
-      }
-
-      mbest[k] = msplit;
-      upper[k] = ubest;
-      nodestatus[k] = NODE_INTERIOR;
-
-      nodepop[ncur + 1] = ndendl - ndstart + 1;
-      nodepop[ncur + 2] = ndend - ndendl;
-      nodestart[ncur + 1] = ndstart;
-      nodestart[ncur + 2] = ndendl + 1;
-
-      nodestatus[ncur + 1] = NODE_TOSPLIT;
-      avnode_number[ncur + 1] = Z_index[jdex[nodestart[ncur + 1]] - 1];
-      if (nodepop[ncur + 1] <= nthsize) {
-        nodestatus[ncur + 1] = NODE_TERMINAL;
-      }
-
-      nodestatus[ncur + 2] = NODE_TOSPLIT;
-      avnode_number[ncur + 2] = Z_index[jdex[nodestart[ncur + 2]] - 1];
-      if (nodepop[ncur + 2] <= nthsize) {
-        nodestatus[ncur + 2] = NODE_TERMINAL;
-      }
-
-      lDaughter[k] = ncur + 1 + 1;
-      rDaughter[k] = ncur + 2 + 1;
-      /* Augment the tree by two nodes. */
-      ncur += 2;
-      rc = rc+1;
-      free(PQZ);
-    }
-    treeSize = nrnodes;
-    for (k = nrnodes - 1; k >= 0; --k) {
-      if (nodestatus[k] == 0) (treeSize)--;
-      if (nodestatus[k] == NODE_TOSPLIT) {
-        nodestatus[k] = NODE_TERMINAL;
-      }
-    }
-    PQZ_length = nsample * (rc);
-    PQZ = (double *) malloc (PQZ_length * sizeof(double));
-    PQZ_update(P_index, Z_index, invP_val, invP_loc, B, F, nnIndx, nnIndxLU, n, rc, PQZ);
-    //double *beta;
-    SEXP beta_r; PROTECT(beta_r = allocVector(REALSXP, rc)); nProtect++; double *beta = REAL(beta_r);
-    //double *beta;
-    //Rprintf(" after findBestSplit: beta_0=%f, beta_1=%f, beta_2=%f, X0_0=%lf, X0_1=%lf\n", beta[0], beta[1], beta[2], PQZ[0], PQZ[1]);
-    if(pinv_choice == 0){
-      beta = pinv_dgelsd_beta_cpp(PQZ, PQy, nsample, rc);
-    }
-    if(pinv_choice == 1){
-      beta = pinv_dgelsy_beta_cpp(PQZ, PQy, nsample, rc);
-    }
-    //Rprintf(" after findBestSplit: beta_0=%f, beta_1=%f, beta_2=%f, X0_0=%f, X0_1=%f\n", beta[0], beta[1], beta[2], PQZ[0], PQZ[1]);
-    free(PQZ);
-
-    for(k = 0; k < treeSize; ++k){
-      if(nodestatus[k] == NODE_TERMINAL){
-        avnode[k] = beta[avnode_number[k]];
-      }
-    }
-
-    PutRNGstate();
-    SEXP ytest_r; PROTECT(ytest_r = allocVector(REALSXP, ntest)); nProtect++; double *ytest = REAL(ytest_r);
-
-    predictRegTree(Xtest, ntest, p, lDaughter, rDaughter, nodestatus, ytest, upper, avnode, mbest);
-
-
-    SEXP result_r, resultName_r;
-    int nResultListObjs = 12;
-
-
-    PROTECT(result_r = allocVector(VECSXP, nResultListObjs)); nProtect++;
-    PROTECT(resultName_r = allocVector(VECSXP, nResultListObjs)); nProtect++;
-
-    SET_VECTOR_ELT(result_r, 0, P_index_r);
-    SET_VECTOR_ELT(resultName_r, 0, mkChar("P_index"));
-
-    SET_VECTOR_ELT(result_r, 1, invP_freq_r);
-    SET_VECTOR_ELT(resultName_r, 1, mkChar("invP_freq"));
-
-    SET_VECTOR_ELT(result_r, 2, invP_loc_r);
-    SET_VECTOR_ELT(resultName_r, 2, mkChar("invP_loc"));
-
-    SET_VECTOR_ELT(result_r, 3, invP_val_r);
-    SET_VECTOR_ELT(resultName_r, 3, mkChar("invP_val"));
-
-    SET_VECTOR_ELT(result_r, 4, PQy_r);
-    SET_VECTOR_ELT(resultName_r, 4, mkChar("PQy"));
-
-    SET_VECTOR_ELT(result_r, 5, ytest_r);
-    SET_VECTOR_ELT(resultName_r, 5, mkChar("ytest"));
-
-    SET_VECTOR_ELT(result_r, 6, Z_index_r);
-    SET_VECTOR_ELT(resultName_r, 6, mkChar("Z_index"));
-
-    SET_VECTOR_ELT(result_r, 7, jdex_r);
-    SET_VECTOR_ELT(resultName_r, 7, mkChar("jdex"));
-
-    SET_VECTOR_ELT(result_r, 8, nodestatus_r);
-    SET_VECTOR_ELT(resultName_r, 8, mkChar("nodestatus"));
-
-    SET_VECTOR_ELT(result_r, 9, avnode_number_r);
-    SET_VECTOR_ELT(resultName_r, 9, mkChar("avnode_number"));
-
-    SET_VECTOR_ELT(result_r, 10, avnode_r);
-    SET_VECTOR_ELT(resultName_r, 10, mkChar("avnode"));
-
-    SET_VECTOR_ELT(result_r, 11, beta_r);
-    SET_VECTOR_ELT(resultName_r, 11, mkChar("beta"));
-
-    namesgets(result_r, resultName_r);
-
-    //unprotect
-    UNPROTECT(nProtect);
-
-
-    return(result_r);
-  }
-
 
   SEXP RFGLStree_cpp(SEXP X_r, SEXP y_r, SEXP B_r, SEXP F_r, SEXP nnIndx_r, SEXP nnIndxLU_r, SEXP invZ_val_r, SEXP invZ_loc_r,
                          SEXP mtry_r, SEXP n_r, SEXP p_r, SEXP nsample_r, SEXP nthsize_r, SEXP nrnodes_r, SEXP treeSize_r, SEXP pinv_choice_r, SEXP Xtest_r, SEXP ntest_r, SEXP nThreads_r, SEXP q_r){
@@ -1061,39 +770,37 @@ extern "C" {
 
     int nProtect = 0;
 
-    //int *P_index = (int *) R_alloc (nsample, sizeof(int));
+
     SEXP P_index_r; PROTECT(P_index_r = allocVector(INTSXP, nsample)); nProtect++; int *P_index = INTEGER(P_index_r);
     int *invP_freq = (int *) R_alloc (n, sizeof(int));
-    //SEXP invP_freq_r; PROTECT(invP_freq_r = allocVector(INTSXP, n)); nProtect++; int *invP_freq = INTEGER(invP_freq_r);
+
     int *invP_loc = (int *) R_alloc ((n + 1), sizeof(int));
-    //SEXP invP_loc_r; PROTECT(invP_loc_r = allocVector(INTSXP, (n + 1) )); nProtect++; int *invP_loc = INTEGER(invP_loc_r);
+
     int *invP_val = (int *) R_alloc (n, sizeof(int));
-    //SEXP invP_val_r; PROTECT(invP_val_r = allocVector(INTSXP, n)); nProtect++; int *invP_val = INTEGER(invP_val_r);
+
     int *i_loc = (int *) R_alloc (n, sizeof(int));
-    //SEXP i_loc_r; PROTECT(i_loc_r = allocVector(INTSXP, n)); nProtect++; int *i_loc = INTEGER(i_loc_r);
+
     int i, k, l;
     double xrand;
-    //int *lDaughter = (int *) R_alloc (nrnodes, sizeof(int));
+
     SEXP lDaughter_r; PROTECT(lDaughter_r = allocVector(INTSXP, nrnodes)); nProtect++; int *lDaughter = INTEGER(lDaughter_r);
-    //int *rDaughter = (int *) R_alloc (nrnodes, sizeof(int));
+
     SEXP rDaughter_r; PROTECT(rDaughter_r = allocVector(INTSXP, nrnodes)); nProtect++; int *rDaughter = INTEGER(rDaughter_r);
-    //int *varUsed = (int *) R_alloc (p, sizeof(int));
+
     SEXP nodestatus_r; PROTECT(nodestatus_r = allocVector(INTSXP, nrnodes)); nProtect++; int *nodestatus = INTEGER(nodestatus_r);
-    //int *nodestatus = (int *) R_alloc (nrnodes, sizeof(int));
+
     int *nodestart = (int *) R_alloc (nrnodes, sizeof(int));
     int *nodepop = (int *) R_alloc (nrnodes, sizeof(int));
-    //int *mbest = (int *) R_alloc (nrnodes, sizeof(int));
+
     SEXP mbest_r; PROTECT(mbest_r = allocVector(INTSXP, nrnodes)); nProtect++; int *mbest = INTEGER(mbest_r);
     SEXP upper_r; PROTECT(upper_r = allocVector(REALSXP, nrnodes)); nProtect++; double *upper = REAL(upper_r);
-    //double *upper = (double *) R_alloc (nrnodes, sizeof(double));
-    //SEXP avnode_number_r; PROTECT(avnode_number_r = allocVector(INTSXP, nrnodes)); nProtect++; int *avnode_number = INTEGER(avnode_number_r);
+
     int *avnode_number = (int *) R_alloc (nrnodes, sizeof(int));
     for(int avcount = 0; avcount < nrnodes; avcount++){
       avnode_number[avcount] = -99;
     }
     SEXP avnode_r; PROTECT(avnode_r = allocVector(REALSXP, nrnodes)); nProtect++; double *avnode = REAL(avnode_r);
-    //double *avnode = (double *) R_alloc (nrnodes, sizeof(double));
-    //int pinv_choice;
+
 
     for(l = 0; l < nrnodes; l++){
       lDaughter[l]  = 0;
@@ -1133,16 +840,11 @@ extern "C" {
       i_loc[P_index[i]] = i_loc[P_index[i]] + 1;
     }
 
-    //SEXP nodestart_r; PROTECT(nodestart_r = allocVector(INTSXP, nrnodes)); nProtect++; int *nodestart = INTEGER(nodestart_r);
-    //SEXP nodepop_r; PROTECT(nodepop_r = allocVector(INTSXP, nrnodes)); nProtect++; int *nodepop = INTEGER(nodepop_r);
-    //int *Z_index = (int *) R_alloc (nsample, sizeof(int));
+
     int *jdex = (int *) R_alloc (n, sizeof(int));
-    //SEXP jdex_r; PROTECT(jdex_r = allocVector(INTSXP, n)); nProtect++; int *jdex = INTEGER(jdex_r);
-    //SEXP Z_index_r; PROTECT(Z_index_r = allocVector(INTSXP, n)); nProtect++; int *Z_index = INTEGER(Z_index_r);
+
     int *Z_index = (int *) R_alloc (n, sizeof(int));
     double *PQy = (double *) R_alloc (nsample, sizeof(double));
-    //SEXP PQy_r; PROTECT(PQy_r = allocVector(REALSXP, nsample)); nProtect++; double *PQy = REAL(PQy_r);
-    //double *PQZ;
 
 
     PQy_update(P_index, y, invP_val, invP_loc, B, F, nnIndx, nnIndxLU, n, PQy);
@@ -1164,10 +866,9 @@ extern "C" {
     int PQZ_length;
 
     int rc = 1;
-    //PQZ_length = nsample * (rc + 1);
-    //SEXP PQZ_r; PROTECT(PQZ_r = allocMatrix(REALSXP, nsample, (rc+1))); nProtect++; double *PQZ = REAL(PQZ_r);
+
     double *PQZ;
-    //PQZ = (double *) realloc (PQZ, PQZ_length * sizeof(double));
+
     for (k = 0; k < nrnodes - 2; ++k){
       if (k > ncur || ncur >= nrnodes - 2) break;
       /* skip if the node is not to be split */
@@ -1182,15 +883,12 @@ extern "C" {
       decsplit = 0.0;
       PQZ_length = nsample * (rc + 1);
       PQZ = (double *) malloc (PQZ_length * sizeof(double));
-      //PQZ = (double *) realloc (PQZ, PQZ_length * sizeof(double));
-      //double *PQZ = (double *) calloc (PQZ_length, sizeof(double));
+
       PQZ_update(P_index, Z_index, invP_val, invP_loc, B, F, nnIndx, nnIndxLU, n, (rc+1), PQZ);
-      //Rprintf(" after PQZ update: PQZ_1=%f, PQZ_2=%f, PQZ_3=%d\n", PQZ[0], PQZ[1], PQZ_length);
-      //pinv_choice = 1;
-      //Rprintf("before findBestSplit: ndstart=%d, ndend=%d, jstat=%d, decsplit=%f\n", ndstart, ndend, jstat, decsplit);
+
       findBestSplit(X, n, jdex, p, nsample, ndstart, ndend, msplit, decsplit, ubest, ndendl, jstat, mtry, nodecnt, Z_index, rc, invP_val,
                     invP_loc, invZ_val, invZ_loc, PQZ, PQy, B, F, nnIndx, nnIndxLU, pinv_choice);
-      //Rprintf(" after findBestSplit: ndstart=%d, ndendl=%d, jstat=%d, decsplit=%f, msplit=%d\n", ndstart, ndendl, jstat, decsplit, msplit);
+
 
 
       if (jstat == 1) {
@@ -1238,18 +936,16 @@ extern "C" {
     PQZ_length = nsample * (rc);
     PQZ = (double *) malloc (PQZ_length * sizeof(double));
     PQZ_update(P_index, Z_index, invP_val, invP_loc, B, F, nnIndx, nnIndxLU, n, rc, PQZ);
-    //double *beta;
+
     double *beta = (double *) R_alloc (rc, sizeof(double));
-    //SEXP beta_r; PROTECT(beta_r = allocVector(REALSXP, rc)); nProtect++; double *beta = REAL(beta_r);
-    //double *beta;
-    //Rprintf(" after findBestSplit: beta_0=%f, beta_1=%f, beta_2=%f, X0_0=%lf, X0_1=%lf\n", beta[0], beta[1], beta[2], PQZ[0], PQZ[1]);
+
     if(pinv_choice == 0){
       beta = pinv_dgelsd_beta_cpp(PQZ, PQy, nsample, rc);
     }
     if(pinv_choice == 1){
       beta = pinv_dgelsy_beta_cpp(PQZ, PQy, nsample, rc);
     }
-    //Rprintf(" after findBestSplit: beta_0=%f, beta_1=%f, beta_2=%f, X0_0=%f, X0_1=%f\n", beta[0], beta[1], beta[2], PQZ[0], PQZ[1]);
+
     free(PQZ);
 
     for(k = 0; k < treeSize; ++k){

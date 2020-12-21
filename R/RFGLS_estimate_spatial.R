@@ -78,19 +78,18 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
 
   p <- ncol(X)
   storage.mode(p) <- "integer"
-  nsample <- n
   storage.mode(nsample) <- "integer"
-  #nthsize <- 20
+
   storage.mode(nthsize) <- "integer"
   if(is.null(nrnodes)){
     nrnodes <- 2 * nsample + 1
   }
   storage.mode(nrnodes) <- "integer"
-  #mtry <- 1
+
   storage.mode(mtry) <- "integer"
   treeSize <- 0
   storage.mode(treeSize) <- "integer"
-  #pinv_choice <- 0
+
   storage.mode(pinv_choice) <- "integer"
 
   ntest <- nrow(Xtest)

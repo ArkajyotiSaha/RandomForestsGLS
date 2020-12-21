@@ -4,7 +4,7 @@
 
 \description{
   The function \code{RFGLS_estimate_spatial} fits univariate non-linear regression models for
-  time-series data using a RF-GLS. \code{RFGLS_estimate_spatial} uses the sparse Cholesky representation
+  time-series data using a RF-GLS in Saha et al. 2020. \code{RFGLS_estimate_spatial} uses the sparse Cholesky representation
   corresponsinding to \code{AR(q)} process. The fitted Random Forest (RF) model is used later for
   prediction via the \code{RFGLS-predict}.
 
@@ -16,8 +16,10 @@
 }
 
 \usage{
-RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20, mtry = 1, pinv_choice = 1, n_omp = 1,
-                                    ntree = 50, h = 1, lag_params = 0.5, variance = 1, param_estimate = FALSE, verbose = FALSE)
+RFGLS_estimate_timeseries(y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20,
+                          mtry = 1, pinv_choice = 1, n_omp = 1,
+                          ntree = 50, h = 1, lag_params = 0.5, variance = 1,
+                          param_estimate = FALSE, verbose = FALSE)
 }
 
 \arguments{
@@ -57,24 +59,24 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
 
   \item{variance}{variance of the white noise in temporal error. The function estimate is not affected by this. Default value is 1. }
 
-  \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF default options and 'nodesize = \code{nthsize}',
+  \item{param_estimate}{if \code{TRUE}, using the residuals obtained from fitting a classical RF default options and \code{nodesize = nthsize},
                         will estimate the coefficeints corresponding to \eqn{AR(q)} from \code{arima} with the option, \code{include.mean = FALSE}.
                         Default value is \code{FALSE}. }
 
-  \item{verbose}{if TRUE, model specifications along with information regarding OpenMP support and progress of the algorithm
+  \item{verbose}{if \code{TRUE}, model specifications along with information regarding OpenMP support and progress of the algorithm
                  is printed to the screen. Otherwise, nothing is printed to the screen. Default value is \code{FALSE}. }
 }
 
 \value{
   A list comprising:
 
-  \item{P_matrix}{an \eqn{n \times ntree}{n x ntree} matrix of zero indexed resamples. \code{t}-th column denote the
-                  \code{n} resamples used in the \code{t}-th tree. }
+  \item{P_matrix}{an \eqn{n \times ntree}{n x ntree} matrix of zero indexed resamples. t-th column denote the
+                  \eqn{n} resamples used in the t-th tree. }
 
-  \item{predicted_matrix}{an \eqn{ntest \times ntree}{n x ntree} matrix of predictions. \code{t}-th column denote the
-                          predictions at \code{ntest} datapoints obtained from the \code{t}-th tree. }
+  \item{predicted_matrix}{an \eqn{ntest \times ntree}{ntest x ntree} matrix of predictions. t-th column denote the
+                          predictions at \eqn{ntest} datapoints obtained from the t-th tree. }
 
-  \item{predicted}{preducted values at the \code{ntest} prediction points. Average (\code{rowMeans}) of the treewise predctions
+  \item{predicted}{preducted values at the \eqn{ntest} prediction points. Average (\code{rowMeans}) of the treewise predctions
                    in \code{predicted_matrix}, }
 
   \item{X}{the matrix \code{X}. }
@@ -86,6 +88,8 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
 }
 
 \references{
+  Saha, A., Basu, S., & Datta, A. (2020). Random Forests for dependent data. arXiv preprint arXiv:2007.15421.
+
   Saha, A., & Datta, A. (2018). BRISC: bootstrap for rapid inference on spatial
   covariances. Stat, e184, DOI: 10.1002/sta4.184.
 
@@ -101,6 +105,7 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
 
 \author{
   Arkajyoti Saha \email{arkajyotisaha93@gmail.com}, \cr
+  Sumanta Basu \email{sumbose@cornell.edu}, \cr
   Abhirup Datta \email{abhidatta@jhu.edu}
 }
 

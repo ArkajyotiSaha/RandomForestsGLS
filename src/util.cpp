@@ -125,27 +125,6 @@ double spCor(double &D, double &phi, double &nu, int &covModel, double *bk){
   }
 }
 
-//Description: computes the quadratic term.
-double Q(double *B, double *F, double *u, double *v, int n, int *nnIndx, int *nnIndxLU){
-
-  double a, b, q = 0;
-  int i, j;
-
-#ifdef _OPENMP
-#pragma omp parallel for private(a, b, j) reduction(+:q)
-#endif
-  for(i = 0; i < n; i++){
-    a = 0;
-    b = 0;
-    for(j = 0; j < nnIndxLU[n+i]; j++){
-      a += B[nnIndxLU[i]+j]*u[nnIndx[nnIndxLU[i]+j]];
-      b += B[nnIndxLU[i]+j]*v[nnIndx[nnIndxLU[i]+j]];
-    }
-    q += (u[i] - a)*(v[i] - b)/F[i];
-  }
-
-  return(q);
-}
 
 //trees
 Node *miniInsert(Node *Tree, double *coords, int index, int d,int n){

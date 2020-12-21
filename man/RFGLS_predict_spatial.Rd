@@ -1,10 +1,10 @@
 \name{RFGLS_predict_spatial}
 \alias{RFGLS_predict_spatial}
-\title{Prediction at new location with RF-GLS}
+\title{Spatial response prediction at new location with RF-GLS}
 
 \description{
   The function \code{RFGLS_predict_spatial} performs fast prediction on a set of new locations with
-  RF-GLS models using Nearest Neighbor Gaussian Processes (NNGP) (Datta et al., 2016).
+  RF-GLS models in Saha et al. 2020 with nonlinear means using Nearest Neighbor Gaussian Processes (NNGP) (Datta et al., 2016).
 
   Some code blocks are borrowed from the R packages: spNNGP:
   Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes
@@ -14,7 +14,7 @@
 }
 
 \usage{
-RFGLS_predict_spatial <- function(RFGLS_out, coords.0, Xtest, h = 1, verbose = FALSE)
+RFGLS_predict_spatial(RFGLS_out, coords.0, Xtest, h = 1, verbose = FALSE)
 }
 
 \arguments{
@@ -22,27 +22,29 @@ RFGLS_predict_spatial <- function(RFGLS_out, coords.0, Xtest, h = 1, verbose = F
   \item{RFGLS_out}{An object obtained from \code{RFGLS_estimate_spatial} or \code{RFGLS_estimate_timeseries}. }
 
   \item{coords.0}{the spatial coordinates corresponding to prediction locations. Its structure should be same as that of coords
-                  in \code{BRISC_estimation}. Default value is a column of \eqn{1} to adjust for the mean(intercept). }
+                  in \code{BRISC_estimation}. Default covariate value is a column of \eqn{1} to adjust for the mean (intercept). }
 
   \item{Xtest}{an \eqn{ntest \times p}{ntest x p} matrix of covariates for prediction. Its Structure should be
                identical (including intercept) with that of covariates provided for estimation purpose in \code{X}
-               in RFGLS_out. }
+               in \code{RFGLS_out}. }
 
-  \item{h}{Number of core to be used in parallel computing setup for bootstrap samples. If h = 1, there is no parallelization.
+  \item{h}{Number of core to be used in parallel computing setup for bootstrap samples. If \code{h = 1}, there is no parallelization.
            Default value is 1. }
 
-  \item{verbose}{if TRUE, model specifications along with information regarding OpenMP support and progress of the algorithm
+  \item{verbose}{if \code{TRUE}, model specifications along with information regarding OpenMP support and progress of the algorithm
                  is printed to the screen. Otherwise, nothing is printed to the screen. Default value is \code{FALSE}. }
 }
 
 \value{
   A list comprising:
 
-  \item{prediction}{predicted response corresponding to X.0 and coords.0. }
+  \item{prediction}{predicted spatial response corresponding to \code{Xtest} and \code{coords.0}. }
 
 }
 
 \references{
+  Saha, A., Basu, S., & Datta, A. (2020). Random Forests for dependent data. arXiv preprint arXiv:2007.15421.
+
   Saha, A., & Datta, A. (2018). BRISC: bootstrap for rapid inference on spatial
   covariances. Stat, e184, DOI: 10.1002/sta4.184.
 
@@ -63,6 +65,7 @@ RFGLS_predict_spatial <- function(RFGLS_out, coords.0, Xtest, h = 1, verbose = F
 
 \author{
   Arkajyoti Saha \email{arkajyotisaha93@gmail.com}, \cr
+  Sumanta Basu \email{sumbose@cornell.edu}, \cr
   Abhirup Datta \email{abhidatta@jhu.edu}
 }
 
@@ -92,8 +95,10 @@ w <- rmvn(1, rep(0,n), sigma.sq*R)
 
 y <- rnorm(n, 10*sin(pi * x) + w, sqrt(tau.sq))
 
-estimation_result <- RFGLS_estimate_spatial(coords[1:200,], y[1:200], matrix(x[1:200,],200,1), ntree = 10)
-prediction_result <- RFGLS_predict_spatial(estimation_result, coords[201:250,], matrix(x[201:250,],50,1))
+estimation_result <- RFGLS_estimate_spatial(coords[1:200,], y[1:200],
+                                 matrix(x[1:200,],200,1), ntree = 10)
+prediction_result <- RFGLS_predict_spatial(estimation_result,
+                           coords[201:250,], matrix(x[201:250,],50,1))
 
 }
 

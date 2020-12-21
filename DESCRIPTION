@@ -2,20 +2,19 @@ Package: RandomForestsGLS
 Type: Package
 Title: Random Forests for dependent data
 Version: 0.1.0
-Authors@R: c(person("Arkajyoti", "Saha", role=c("aut", "cre"), email="arkajyotisaha93@gmail.com"), person("Abhirup", "Datta", role="aut", email="abhidatta@jhu.edu"))
+Authors@R: c(person("Arkajyoti", "Saha", role=c("aut", "cre"), email="arkajyotisaha93@gmail.com"), person("Sumanta", "Basu", role="aut", email="sumbose@cornell.edu"), person("Abhirup", "Datta", role="aut", email="abhidatta@jhu.edu"))
 Maintainer: Arkajyoti Saha <arkajyotisaha93@gmail.com>
 Author: Arkajyoti Saha [aut, cre],
+  Sumanta Basu [aut,]
   Abhirup Datta [aut]
-Depends: R (>= 3.3.0), knitr, BRISC, parallel, stats, matrixStats, randomForest,
-        pbapply
+Depends: R (>= 3.3.0)
+Imports: BRISC, parallel, stats, matrixStats, randomForest, pbapply
+Suggests: knitr, rmarkdown, ggplot2
 Description: Fits non-linear regression models on dependant data with Generalised Least Square (GLS) based Random Forest (RF-GLS) detailed in Saha, Basu and Datta (2020) <https://arxiv.org/abs/2007.15421>.
 License: GPL (>= 2)
-URL: https://github.com/ArkajyotiSaha/RFGLS
-BugReports: https://github.com/ArkajyotiSaha/RFGLS/issues
+URL: https://github.com/ArkajyotiSaha/RandomForestsGLS
+BugReports: https://github.com/ArkajyotiSaha/RandomForestsGLS/issues
 Encoding: UTF-8
 VignetteBuilder: knitr
 NeedsCompilation: yes
-RoxygenNote: 6.1.1
-Packaged: 2020-09-25 4:29:25 UTC; arkajyotisaha
-Repository: CRAN
-Date/Publication: 2020-05-29 4:34:02 UTC
+

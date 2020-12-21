@@ -24,8 +24,6 @@ std::string getCorName(int i);
 
 double spCor(double &D, double &phi, double &nu, int &covModel, double *bk);
 
-double Q(double *B, double *F, double *u, double *v, int n, int *nnIndx, int *nnIndxLU);
-
 //trees
 struct Node{
 	int index; // which point I am
