@@ -1,6 +1,6 @@
 ---
 title: "How to use RandomForestsGLS"
-output: rmarkdown::html_vignette
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{How to use RandomForestsGLS}
   %\VignetteEngine{knitr::rmarkdown}
@@ -24,14 +24,14 @@ Next, we discuss how the `RandomForestsGLS` package can be used for estimation a
 
 # 1. Spatial Data
 
-We consider spatial point referenced data with the follwing model:
+We consider spatial point referenced data with the following model:
 
 $$
 y_i = m(\mathbf{x}_i) + w(\mathbf{s}_i) + \epsilon_i;
 $$
 where, $y_i, \mathbf{x}_i$ respectively denotes the observed response and the covariate corresponding to the $i^{th}$ observed location $\mathbf{s}_i$. $m(\mathbf{x}_i)$ denotes the covariate effect, spatial random effect, $w (\mathbf{s})$ accounts for spatial dependence beyond covariates, and $\mathbf{\epsilon}$ accounts for the independent and identically distributed random Gaussian noise. 
 
-In the spatial mixture model setting, the package `RandomForestsGLS` allows for fiting $m(.)$ using RF-GLS. Spatial random effects are modeled using Gaussian Process as is the practice. For model fitting, we use the computationally convenient Nearest Neighbor Gaussian Process (NNGP) (Datta, Banerjee, Finley, and Gelfand (2016)). Along with prediction of the mean function $m(.)$ we also offer kriging based prediction of spatial responses at new location. 
+In the spatial mixture model setting, the package `RandomForestsGLS` allows for fitting $m(.)$ using RF-GLS. Spatial random effects are modeled using Gaussian Process as is the practice. For model fitting, we use the computationally convenient Nearest Neighbor Gaussian Process (NNGP) (Datta, Banerjee, Finley, and Gelfand (2016)). Along with prediction of the covariate effect (mean function) $m(.)$ we also offer kriging based prediction of spatial responses at new location. 
 
 
 ## Illustration
@@ -72,7 +72,7 @@ y <- rnorm(n, 10*sin(pi * x) + w, sqrt(tau.sq))
 
 ##  Model fitting
 
-In the package `RandomForestsGLS`, the working precision matrix used in the GLS-loss are NNGP approximations of precision matrices corresponsing to Matérn covariance function. 
+In the package `RandomForestsGLS`, the working precision matrix used in the GLS-loss are NNGP approximations of precision matrices corresponding to Matérn covariance function. 
 
 In order to fit the model, the code requires: 
 
@@ -80,14 +80,14 @@ In order to fit the model, the code requires:
 + Response (`y`):  an $n$ length vector of response at the observed coordinates.
 + Covariates (`X`): an $n \times p$ matrix of the covariates in the observation coordinates.
 + Covariates for estimation (`Xtest`): an $ntest \times p$ matrix of the covariates where we want to estimate the function. Must have identical variables as that of `X`. Default is `X`.
-+ Minimum size of leaf nodes (`nthsize`): We recommend not setting this value too small, as that will lead to very deep trees that takes a lot of time to be built and can produce unstable estimaes. Default value is 20.
++ Minimum size of leaf nodes (`nthsize`): We recommend not setting this value too small, as that will lead to very deep trees that takes a lot of time to be built and can produce unstable estimates. Default value is 20.
 + The parameters corresponding to the covariance function (detailed afterwards).
 
-For the details on choice of other parameters, please refer to the help file of the code `RFGLS_estimate_spatial`, which can be acessed with `?RFGLS_estimate_spatial`. 
+For the details on choice of other parameters, please refer to the help file of the code `RFGLS_estimate_spatial`, which can be accessed with `?RFGLS_estimate_spatial`. 
 
 ### Known Covariance Parameters
 
-If the covariance parameters are known we set `param_estimate = FALSE` (default value); the code additionally requires the following:
+If the covariance parameters are known, we set `param_estimate = FALSE` (default value); the code additionally requires the following:
 
 + Covariance Model (`cov.model`): Supported keywords are: "exponential", "matern", "spherical", and "gaussian" for exponential, Matérn, spherical and Gaussian covariance function respectively. Default value is "exponential".
 + $\sigma^2$ (`sigma.sq`): The spatial variance. Default value is 1.
@@ -103,11 +103,11 @@ est_known <- RFGLS_estimate_spatial(coords, y, x, ntree = 50, cov.model = "expon
                                     nthsize = 20, sigma.sq = sigma.sq, tau.sq = tau.sq, 
                                     phi = phi)
 ```
-The estimate of the function at the covarates `Xtest` is given in `estimation_reult$predicted`. For interpretation of the rest of the outputs, please see the help file of the code `RFGLS_estimate_spatial`. Using covariance models other than exponential model are in beta testing stage.
+The estimate of the function at the covariates `Xtest` is given in `estimation_reult$predicted`. For interpretation of the rest of the outputs, please see the help file of the code `RFGLS_estimate_spatial`. Using covariance models other than exponential model are in beta testing stage.
 
 ### Unknown Covariance Parameters
 
-If the covariance parameters are not known we set `param_estimate = TRUE`; the code additionally requires the covariance model (`cov.model`) to be used for parameter estimation prior to RF-GLS fitting. We fit the model with unknown covaraince parameters as follows.  
+If the covariance parameters are not known we set `param_estimate = TRUE`; the code additionally requires the covariance model (`cov.model`) to be used for parameter estimation prior to RF-GLS fitting. We fit the model with unknown covariance parameters as follows.  
 
 ```{r model_fit_unknown, message=FALSE, warning=FALSE}
 set.seed(1)
@@ -149,7 +149,7 @@ mean((RFGLS_predict_unknown$predicted - 10*sin(pi * Xtest))^2)
 
 We plot the true $m(x) = 10sin(\pi x)$ along with the loess-smoothed version of estimated $\hat{m}(.)$ obtained from RF-GLS and RF where we show that RF-GLS estimate approximates $m(x)$ better than that corresponding to RF.
 
-```{r plot_comparison, message=FALSE, warning=FALSE, fig.width = 4, fig.retina = 5}
+```{r plot_comparison, message=FALSE, warning=FALSE}
 rfgls_loess_10 <- loess(RFGLS_predict_known$predicted ~ c(1:length(Xtest)), span=0.1)
 rfgls_smoothed10 <- predict(rfgls_loess_10)
 
@@ -172,7 +172,7 @@ geom_point() + labs( x = "x") + labs( y = "f(x)")
 
 ## Prediction of spatial response
 
-Given a fitted model using `RFGLS_estimate_spatial`, we can predict the spatial response/outcome at new locations provided the covariates at that location. This approach performs kriging at a new location using the mean function estimates at the corresponding covariate values. Here we partition the simulated data into training and test sets in 4:1 ratio. Next we perform prediction on the test set using a model fitted on the trining set.
+Given a fitted model using `RFGLS_estimate_spatial`, we can predict the spatial response/outcome at new locations provided the covariates at that location. This approach performs kriging at a new location using the mean function estimates at the corresponding covariate values. Here we partition the simulated data into training and test sets in 4:1 ratio. Next we perform prediction on the test set using a model fitted on the training set.
 
 ```{r prediction_spatial, message=FALSE, warning=FALSE}
 est_known_short <- RFGLS_estimate_spatial(coords[1:160,], y[1:160], 
@@ -180,6 +180,11 @@ est_known_short <- RFGLS_estimate_spatial(coords[1:160,], y[1:160],
                    nthsize = 20, param_estimate = TRUE)
 RFGLS_predict_spatial <- RFGLS_predict_spatial(est_known_short, coords[161:200,], 
                                                matrix(x[161:200,],40,1))
+pred_mat <- as.data.frame(cbind(RFGLS_predict_spatial$prediction, y[161:200]))
+colnames(pred_mat) <- c("Predicted", "Observed")
+ggplot(pred_mat, aes(x=Observed, y=Predicted)) + geom_point() + 
+  geom_abline(intercept = 0, slope = 1, color = "blue") +
+  ylim(0, 16) + xlim(0, 16)
 ```
 
 
@@ -214,9 +219,9 @@ mean((RFGLS_predict_misspec$predicted - 10*sin(pi * Xtest))^2)
 mean((RF_predict - 10*sin(pi * Xtest))^2)
 ```
 
-# 2. Autoregressive Timeseries Data
+# 2. Autoregressive Time Series Data
 
-RF-GLS can also be used for function estimation in a time-series setting under autoregressive errors. We consider timeseries data with errors from a AR(q) process as follows:
+RF-GLS can also be used for function estimation in a time series setting under autoregressive errors. We consider time series data with errors from an AR(q) process as follows:
 
 $$
 y_t = m(\mathbf{x}_t) + e_t;\: e_t = \sum_{i = 1}^q\rho_i e_{t-i} + \eta_t
@@ -224,7 +229,7 @@ $$
 where, $y_i, \mathbf{x}_i$ denotes the response and the covariate corresponding to the $t^{th}$ time point, $e_t$ is an AR(q) pprocess, $\eta_t$ denotes the i.i.d. white noise and $(\rho_1, \cdots, \rho_q)$ are the model parameters that captures the dependence of $e_t$ on $(e_{t - 1}, \cdots, e_{t-q})$.
 
 
-In the AR timeseries scenario, the package `RandomForestsGLS` allows for fiting $m(.)$ using RF-GLS. RF-GLS exploits the sparsity of the closed form precision matrix of the AR process for model fitting and prediction of mean function $m(.)$. 
+In the AR time series scenario, the package `RandomForestsGLS` allows for fitting $m(.)$ using RF-GLS. RF-GLS exploits the sparsity of the closed form precision matrix of the AR process for model fitting and prediction of mean function $m(.)$. 
 
 ## Illustration
 
@@ -249,15 +254,15 @@ y <- c(eps + 10*sin(pi * x))
 
 ##  Model fitting
 
-In case of timeseries data, the code requires: 
+In case of time series data, the code requires: 
 
 + Response (`y`):  an $n$ length vector of response at the observed time points.
 + Covariates (`X`): an $n \times p$ matrix of the covariates in the observation time points.
 + Covariates for estimation (`Xtest`): an $ntest \times p$ matrix of the covariates where we want to estimate the function. Must have identical variables as that of `X`. Default is `X`.
-+ Minimum size of leaf nodes (`nthsize`): We recommend not setting this value too small, as that will lead to very deep trees that takes a lot of time to be built and can produce unstable estimaes. Default value is 20.
++ Minimum size of leaf nodes (`nthsize`): We recommend not setting this value too small, as that will lead to very deep trees that takes a lot of time to be built and can produce unstable estimates. Default value is 20.
 + The parameters corresponding to the AR process (detailed afterwards).
 
-For the details on choice of other parameters, please refer to the help file of the code `RFGLS_estimate_timeseries`, which can be acessed with `?RFGLS_estimate_timeseries`. 
+For the details on choice of other parameters, please refer to the help file of the code `RFGLS_estimate_timeseries`, which can be accessed with `?RFGLS_estimate_timeseries`. 
 
 ### Known AR process Parameters
 
@@ -283,7 +288,7 @@ est_temp_unknown <- RFGLS_estimate_timeseries(y, x, ntree = 50, lag_params = rho
 
 ## Prediction of mean function
 
-This part of timeseries data analysis is identical to that corresponding to the spatial data.
+This part of time series data analysis is identical to that corresponding to the spatial data.
 
 ```{r model_estimate_temporal, message=FALSE, warning=FALSE}
 Xtest <- matrix(seq(0,1, by = 1/10000), 10001, 1)
@@ -374,4 +379,4 @@ mean((RFGLS_predict_known$predicted - 10*sin(pi * Xtest))^2)
 mean((RFGLS_predict_known_pl$predicted - 10*sin(pi * Xtest))^2)
 ```
 
-For `RFGLS_estimate_spatial` with very small dataset (`n`) and small number of trees (`ntree`), communication overhead between the nodes for parallelization outweighs the benefits of the parallel computing hence it is recommended to parallelize only for moderately large `n` and/or `ntree`. It is strongly recommended that the max value of `h` is kept strictly less than the number of total cores available. Parallelization for `RFGLS_estimate_timeseries` can be adressed identically. For `RFGLS_predict` and `RFGLS_predict_spatial`, even for large dataset, single core performance is very fast, hence unless `ntest` and `ntree` are very high, we do not recommend using parallelization for `RFGLS_predict` and `RFGLS_predict_spatial`.
+For `RFGLS_estimate_spatial` with very small dataset (`n`) and small number of trees (`ntree`), communication overhead between the nodes for parallelization outweighs the benefits of the parallel computing hence it is recommended to parallelize only for moderately large `n` and/or `ntree`. It is strongly recommended that the max value of `h` is kept strictly less than the number of total cores available. Parallelization for `RFGLS_estimate_timeseries` can be addressed identically. For `RFGLS_predict` and `RFGLS_predict_spatial`, even for large dataset, single core performance is very fast, hence unless `ntest` and `ntree` are very high, we do not recommend using parallelization for `RFGLS_predict` and `RFGLS_predict_spatial`.

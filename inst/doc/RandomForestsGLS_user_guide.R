@@ -60,7 +60,7 @@ RFGLS_predict_unknown <- RFGLS_predict(est_unknown, Xtest)
 #RF-GLS unknown MISE
 mean((RFGLS_predict_unknown$predicted - 10*sin(pi * Xtest))^2)
 
-## ----plot_comparison, message=FALSE, warning=FALSE, fig.width = 4, fig.retina = 5----
+## ----plot_comparison, message=FALSE, warning=FALSE----------------------------
 rfgls_loess_10 <- loess(RFGLS_predict_known$predicted ~ c(1:length(Xtest)), span=0.1)
 rfgls_smoothed10 <- predict(rfgls_loess_10)
 
@@ -85,6 +85,11 @@ est_known_short <- RFGLS_estimate_spatial(coords[1:160,], y[1:160],
                    nthsize = 20, param_estimate = TRUE)
 RFGLS_predict_spatial <- RFGLS_predict_spatial(est_known_short, coords[161:200,], 
                                                matrix(x[161:200,],40,1))
+pred_mat <- as.data.frame(cbind(RFGLS_predict_spatial$prediction, y[161:200]))
+colnames(pred_mat) <- c("Predicted", "Observed")
+ggplot(pred_mat, aes(x=Observed, y=Predicted)) + geom_point() + 
+  geom_abline(intercept = 0, slope = 1, color = "blue") +
+  ylim(0, 16) + xlim(0, 16)
 
 ## ----misspec_spatial, message=FALSE, warning=FALSE----------------------------
 #Data simulation from matern with nu = 1.5
