@@ -7,21 +7,23 @@
   non-linear mean estimate from a fitted RF-GLS model in Saha et al. 2020 with spatial kriging estimate obtained by using Nearest Neighbor Gaussian Processes (NNGP) (Datta et al., 2016).
 
   Some code blocks are borrowed from the R packages: spNNGP:
-  Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes
+  Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes \cr
   https://CRAN.R-project.org/package=spNNGP and randomForest: Breiman and Cutler's Random
-  Forests for Classification and Regression https://CRAN.R-project.org/package=randomForest .
+  Forests for Classification and Regression \cr https://CRAN.R-project.org/package=randomForest .
 
 }
 
 \usage{
-RFGLS_predict_spatial(RFGLS_out, coords.0, Xtest, h = 1, verbose = FALSE)
+RFGLS_predict_spatial(RFGLS_out, coords.0, Xtest,
+                      h = 1, verbose = FALSE)
 }
 
 \arguments{
 
-  \item{RFGLS_out}{an object obtained from \code{RFGLS_estimate_spatial} or \code{RFGLS_estimate_timeseries}. }
+  \item{RFGLS_out}{an object obtained from \code{RFGLS_estimate_spatial}. }
 
-  \item{coords.0}{the spatial coordinates corresponding to prediction locations. Its structure should be same as that of coords
+  \item{coords.0}{the spatial coordinates corresponding to prediction locations. \cr
+                  Its structure should be same as that of coords
                   in \code{BRISC_estimation}. Default covariate value is a column of \eqn{1} to adjust for the mean (intercept). }
 
   \item{Xtest}{an \eqn{ntest \times p}{ntest x p} matrix of covariates for prediction. Its Structure should be
@@ -58,7 +60,7 @@ RFGLS_predict_spatial(RFGLS_out, coords.0, Xtest, h = 1, verbose = FALSE)
   https://CRAN.R-project.org/package=spNNGP
 
   Andy Liaw, and Matthew Wiener (2015). randomForest: Breiman and Cutler's Random
-  Forests for Classification and Regression. R package version 4.6-14.
+  Forests for Classification and Regression. R package version 4.6-14. \cr
   https://CRAN.R-project.org/package=randomForest
 
 }

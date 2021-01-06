@@ -30,14 +30,14 @@ void updateBF_org(double *B, double *F, double *c, double *C, double *D, double 
   double one = 1.0;
   double zero = 0.0;
   char lower = 'L';
-  double logDet = 0;
+
   double nu = 0;
   //check if the model is 'matern'
   if (covModel == 2) {
     nu = theta[2];
   }
 
-  double *bk = (double *) R_alloc(nThreads*(static_cast<int>(1.0+5.0)), sizeof(double));
+  double *bk = (double *) calloc(nThreads*(static_cast<int>(1.0+5.0)), sizeof(double));
 
 
   //bk must be 1+(int)floor(alpha) * nthread
@@ -70,192 +70,205 @@ void updateBF_org(double *B, double *F, double *c, double *C, double *D, double 
       F[i] = 1 + theta[0];
     }
   }
-}
-
-double pinv_dgelsy_rss_cpp(double *A, double *b, int nrowA, int ncolA){
-
-  int nProtect=0;
-  int inc = 1;
-  int nlengthb=nrowA;
-  int nlengthA=nrowA * ncolA;
-
-  double *y0 = (double *) malloc(nlengthb * sizeof(double));
-  F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
-
-  double *X0 = (double *) malloc(nlengthA * sizeof(double));
-  F77_NAME(dcopy)(&nlengthA, A, &inc, X0, &inc);
-
-  int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
-  double rcond = -1.0;
-  /* Local arrays */
-  int jvpt[ncolA];
-  for(int zp = 0; zp < ncolA; zp++){
-    jvpt[zp] = 0;
-  }
-  int lwork = -1;
-  int liwork;
-  int* iwork = NULL;
-  double* work = NULL;
-  int iwork_query;
-  double work_query;
-  F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, &work_query, &lwork, &info);
-  liwork = (int)iwork_query;
-  lwork = (int)work_query;
-  iwork = (int *) malloc(liwork * sizeof(int));
-  work = (double *) malloc(lwork * sizeof(double));
-  F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, work, &lwork, &info);
-
-
-
-  //create Xbeta
-  char const *ntran = "N";
-  const double one = 1.0;
-  const double zero = 0.0;
-  double *tmp_n = (double *) R_alloc(m, sizeof(double));
-  F77_NAME(dgemv)(ntran, &m, &n, &one, A, &m, y0, &inc, &zero, tmp_n, &inc);
-
-
-  //create residual
-  const double negOne = -1.0;
-  F77_NAME(daxpy)(&m, &negOne, b, &inc, tmp_n, &inc);
-
-  double rss = 0.0;
-  for(int ilp = 0; ilp < m; ilp++){
-    rss = rss + pow(tmp_n[ilp], 2.0);
-  }
-
-  free(y0);
-  free(X0);
-  free(iwork);
-  free(work);
-
-  return(rss);
-
-}
-
-double* pinv_dgelsy_beta_cpp(double *A, double *b, int nrowA, int ncolA){
-
-  int nProtect=0;
-  int inc = 1;
-  int nlengthb=nrowA;
-  int nlengthA=nrowA * ncolA;
-
-  double *y0 = (double *) R_alloc(nlengthb, sizeof(double));
-  F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
-
-  double *X0 = (double *) R_alloc(nlengthA, sizeof(double));
-  F77_NAME(dcopy)(&nlengthA, A, &inc, X0, &inc);
-
-  int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
-  double rcond = -1.0;
-  /* Local arrays */
-  int jvpt[ncolA];
-  for(int zp = 0; zp < ncolA; zp++){
-    jvpt[zp] = 0;
-  }
-  int lwork = -1;
-  int liwork;
-  int* iwork = NULL;
-  double* work = NULL;
-  int iwork_query;
-  double work_query;
-  F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, &work_query, &lwork, &info);
-  liwork = (int)iwork_query;
-  lwork = (int)work_query;
-  iwork = (int *) R_alloc(liwork, sizeof(int));
-  work = (double *) R_alloc(lwork, sizeof(double));
-  F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, work, &lwork, &info);
-
-  return(y0);
-
-}
-
-double pinv_dgelsd_rss_cpp(double *A, double *b, int nrowA, int ncolA){
-  int nProtect=0;
-  int inc = 1;
-  int nlengthb=nrowA;
-  int nlengthA=nrowA * ncolA;
-
-  double *y0 = (double *) malloc(nlengthb * sizeof(double));
-  F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
-
-  double *X0 = (double *) malloc(nlengthA * sizeof(double));
-  F77_NAME(dcopy)(&nlengthA, A, &inc, X0, &inc);
-
-  int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
-  double rcond = -1.0;
-  /* Local arrays */
-  double s[nrowA];
-  int lwork = -1;
-  int liwork;
-  int* iwork = NULL;
-  double* work = NULL;
-  int iwork_query;
-  double work_query;
-  F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, &work_query, &lwork, &iwork_query, &info);
-  liwork = (int)iwork_query;
-  lwork = (int)work_query;
-  iwork = (int *) malloc(liwork * sizeof(int));
-  work = (double *) malloc(lwork * sizeof(double));
-  F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, work, &lwork, iwork, &info);
-
-  //calculate rss
-  double rss = 0.0;
-  for(int lip = 0; lip < (nrowA - ncolA -1); lip++){
-    rss = rss + pow(y0[ncolA+1+lip], 2.0);
-  }
-
-  free(y0);
-  free(X0);
-  free(iwork);
-  free(work);
-  return(rss);
-}
-
-double* pinv_dgelsd_beta_cpp(double *A, double *b, int nrowA, int ncolA){
-  int nProtect=0;
-  int inc = 1;
-  int nlengthb=nrowA;
-  int nlengthA=nrowA * ncolA;
-
-  double *y0 = (double *) malloc(nlengthb * sizeof(double));
-  F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
-
-  double *X0 = (double *) malloc(nlengthA * sizeof(double));
-  F77_NAME(dcopy)(&nlengthA, A, &inc, X0, &inc);
-
-  int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
-  double rcond = -1.0;
-  /* Local arrays */
-  double s[nrowA];
-  int lwork = -1;
-  int liwork;
-  int* iwork = NULL;
-  double* work = NULL;
-  int iwork_query;
-  double work_query;
-  F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, &work_query, &lwork, &iwork_query, &info);
-  liwork = (int)iwork_query;
-  lwork = (int)work_query;
-  iwork = (int *) malloc(liwork * sizeof(int));
-  work = (double *) malloc(lwork * sizeof(double));
-  F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, work, &lwork, iwork, &info);
-
-  double *beta = (double *) malloc(ncolA * sizeof(double));
-  //calculate beta
-  for(int lip = 0; lip < ncolA; lip++){
-    beta[lip] = y0[lip];
-  }
-
-  free(y0);
-  free(X0);
-  free(iwork);
-  free(work);
-
-  return(beta);
+  free(bk);
 }
 
 extern "C" {
+
+  double pinv_dgelsy_rss_cpp(double *A, double *b, int nrowA, int ncolA){
+
+
+    int inc = 1;
+    int nlengthb=nrowA;
+    int nlengthA=nrowA * ncolA;
+
+    double *y0 = (double *) malloc(nlengthb * sizeof(double));
+    F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
+
+    double *X0 = (double *) malloc(nlengthA * sizeof(double));
+    F77_NAME(dcopy)(&nlengthA, A, &inc, X0, &inc);
+
+    int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
+    double rcond = -1.0;
+    /* Local arrays */
+    int *jvpt;
+    jvpt = new int [ncolA];
+    for(int zp = 0; zp < ncolA; zp++){
+      jvpt[zp] = 0;
+    }
+    int lwork = -1;
+
+    int* iwork = NULL;
+    double* work = NULL;
+
+    double work_query;
+    F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, &work_query, &lwork, &info);
+
+    lwork = (int)work_query;
+
+    work = (double *) malloc(lwork * sizeof(double));
+    F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, work, &lwork, &info);
+
+
+
+    //create Xbeta
+    char const *ntran = "N";
+    const double one = 1.0;
+    const double zero = 0.0;
+    double *tmp_n = (double *) malloc(m * sizeof(double));
+    F77_NAME(dgemv)(ntran, &m, &n, &one, A, &m, y0, &inc, &zero, tmp_n, &inc);
+
+
+    //create residual
+    const double negOne = -1.0;
+    F77_NAME(daxpy)(&m, &negOne, b, &inc, tmp_n, &inc);
+
+    double rss = 0.0;
+    for(int ilp = 0; ilp < m; ilp++){
+      rss = rss + pow(tmp_n[ilp], 2.0);
+    }
+
+    free(y0);
+    free(X0);
+    free(iwork);
+    free(work);
+    free(jvpt);
+    free(tmp_n);
+    return(rss);
+
+  }
+
+  double* pinv_dgelsy_beta_cpp(double *A, double *b, int nrowA, int ncolA){
+
+
+    int inc = 1;
+    int nlengthb=nrowA;
+    int nlengthA=nrowA * ncolA;
+
+    double *y0 = (double *) malloc(nlengthb * sizeof(double));
+    F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
+
+    double *X0 = (double *) malloc(nlengthA * sizeof(double));
+    F77_NAME(dcopy)(&nlengthA, A, &inc, X0, &inc);
+
+    int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
+    double rcond = -1.0;
+    /* Local arrays */
+    int *jvpt;
+    jvpt = new int [ncolA];
+    for(int zp = 0; zp < ncolA; zp++){
+      jvpt[zp] = 0;
+    }
+    int lwork = -1;
+
+
+    double* work = NULL;
+
+    double work_query;
+    F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, &work_query, &lwork, &info);
+
+    lwork = (int)work_query;
+
+    work = (double *) malloc(lwork * sizeof(double));
+    F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, work, &lwork, &info);
+
+    free(X0);
+    free(work);
+    free(jvpt);
+    return(y0);
+
+  }
+
+  double pinv_dgelsd_rss_cpp(double *A, double *b, int nrowA, int ncolA){
+
+    int inc = 1;
+    int nlengthb=nrowA;
+    int nlengthA=nrowA * ncolA;
+
+    double *y0 = (double *) malloc(nlengthb * sizeof(double));
+    F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
+
+    double *X0 = (double *) malloc(nlengthA * sizeof(double));
+    F77_NAME(dcopy)(&nlengthA, A, &inc, X0, &inc);
+
+    int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
+    double rcond = -1.0;
+    /* Local arrays */
+    double *s;
+    s = new double [nrowA];
+    //double s[nrowA];
+    int lwork = -1;
+    int liwork;
+    int* iwork = NULL;
+    double* work = NULL;
+    int iwork_query;
+    double work_query;
+    F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, &work_query, &lwork, &iwork_query, &info);
+    liwork = (int)iwork_query;
+    lwork = (int)work_query;
+    iwork = (int *) malloc(liwork * sizeof(int));
+    work = (double *) malloc(lwork * sizeof(double));
+    F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, work, &lwork, iwork, &info);
+
+    //calculate rss
+    double rss = 0.0;
+    for(int lip = 0; lip < (nrowA - ncolA -1); lip++){
+      rss = rss + pow(y0[ncolA+1+lip], 2.0);
+    }
+
+    free(y0);
+    free(X0);
+    free(iwork);
+    free(work);
+    free(s);
+    return(rss);
+  }
+
+  double* pinv_dgelsd_beta_cpp(double *A, double *b, int nrowA, int ncolA){
+
+    int inc = 1;
+    int nlengthb=nrowA;
+    int nlengthA=nrowA * ncolA;
+
+    double *y0 = (double *) malloc(nlengthb * sizeof(double));
+    F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
+
+    double *X0 = (double *) malloc(nlengthA * sizeof(double));
+    F77_NAME(dcopy)(&nlengthA, A, &inc, X0, &inc);
+
+    int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
+    double rcond = -1.0;
+    /* Local arrays */
+    double *s;
+    s = new double [nrowA];
+    //double s[nrowA];
+    int lwork = -1;
+    int liwork;
+    int* iwork = NULL;
+    double* work = NULL;
+    int iwork_query;
+    double work_query;
+    F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, &work_query, &lwork, &iwork_query, &info);
+    liwork = (int)iwork_query;
+    lwork = (int)work_query;
+    iwork = (int *) malloc(liwork * sizeof(int));
+    work = (double *) malloc(lwork * sizeof(double));
+    F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, work, &lwork, iwork, &info);
+
+    double *beta = (double *) malloc(ncolA * sizeof(double));
+    //calculate beta
+    for(int lip = 0; lip < ncolA; lip++){
+      beta[lip] = y0[lip];
+    }
+
+    free(y0);
+    free(X0);
+    free(iwork);
+    free(work);
+    free(s);
+    return(beta);
+  }
+
 
   SEXP RFGLS_BFcpp(SEXP n_r, SEXP m_r, SEXP coords_r, SEXP covModel_r, SEXP alphaSqStarting_r, SEXP phiStarting_r, SEXP nuStarting_r,
                               SEXP sType_r, SEXP nThreads_r, SEXP verbose_r){
@@ -548,7 +561,7 @@ extern "C" {
     int PQZ_length = nsample * (rc + 1);
     double *PQZ_local = (double *) calloc (PQZ_length, sizeof(double));
 
-    int index, temp_t, temp_i, l, t, ji;
+    int temp_t, temp_i, l, t, ji;
     double tt_1;
 
     int PQy_length = nsample;
@@ -762,7 +775,7 @@ extern "C" {
     int pinv_choice = INTEGER(pinv_choice_r)[0];
     double *Xtest = REAL(Xtest_r);
     int ntest = INTEGER(ntest_r)[0];
-    int nThreads = INTEGER(nThreads_r)[0];
+
     int q = INTEGER(q_r)[0];
 
 
@@ -852,7 +865,7 @@ extern "C" {
 
     int ncur, ndstart, ndend, ndendl, nodecnt, jstat, msplit = 0;
     double decsplit, ubest;
-    int npopl = n, npopr = 0;
+
 
     for (i = 1; i <= n; ++i){
       jdex[i-1] = i;

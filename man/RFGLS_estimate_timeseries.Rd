@@ -9,17 +9,21 @@
   prediction via the \code{RFGLS-predict}.
 
   Some code blocks are borrowed from the R packages: spNNGP:
-  Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes
-  https://CRAN.R-project.org/package=spNNGP and randomForest: Breiman and Cutler's Random
-  Forests for Classification and Regression https://CRAN.R-project.org/package=randomForest .
+  Spatial Regression Models for Large Datasets using Nearest Neighbor
+  Gaussian Processes \cr https://CRAN.R-project.org/package=spNNGP and
+  randomForest: Breiman and Cutler's Random Forests for Classification
+  and Regression \cr https://CRAN.R-project.org/package=randomForest .
 
 }
 
 \usage{
-RFGLS_estimate_timeseries(y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20,
-                          mtry = 1, pinv_choice = 1, n_omp = 1,
-                          ntree = 50, h = 1, lag_params = 0.5, variance = 1,
-                          param_estimate = FALSE, verbose = FALSE)
+RFGLS_estimate_timeseries(y, X, Xtest = NULL, nrnodes = NULL,
+                          nthsize = 20, mtry = 1,
+                          pinv_choice = 1, n_omp = 1,
+                          ntree = 50, h = 1, lag_params = 0.5,
+                          variance = 1,
+                          param_estimate = FALSE,
+                          verbose = FALSE)
 }
 
 \arguments{
@@ -94,7 +98,7 @@ RFGLS_estimate_timeseries(y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20,
   covariances. Stat, e184, DOI: 10.1002/sta4.184.
 
   Andy Liaw, and Matthew Wiener (2015). randomForest: Breiman and Cutler's Random
-  Forests for Classification and Regression. R package version 4.6-14.
+  Forests for Classification and Regression. R package version 4.6-14. \cr
   https://CRAN.R-project.org/package=randomForest
 
   Andrew Finley, Abhirup Datta and Sudipto Banerjee (2017). spNNGP: Spatial Regression Models for Large
@@ -129,7 +133,8 @@ rho <- 0.5
 set.seed(3)
 b <- rho
 s <- sqrt(sigma.sq)
-eps = arima.sim(list(order = c(1,0,0), ar = b), n = n, rand.gen = rnorm, sd = s)
+eps = arima.sim(list(order = c(1,0,0), ar = b),
+                n = n, rand.gen = rnorm, sd = s)
 
 y <- eps + 10*sin(pi * x)
 

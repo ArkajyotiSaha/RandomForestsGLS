@@ -7,7 +7,7 @@
   It uses a fitted RF-GLS model in Saha et al. 2020 to obtain the predictions.
 
   Some code blocks are borrowed from the R package: randomForest: Breiman and Cutler's Random
-  Forests for Classification and Regression https://CRAN.R-project.org/package=randomForest .
+  Forests for Classification and Regression \cr https://CRAN.R-project.org/package=randomForest .
 
 }
 
@@ -17,7 +17,8 @@ RFGLS_predict(RFGLS_out, Xtest, h = 1, verbose = FALSE)
 
 \arguments{
 
-  \item{RFGLS_out}{an object obtained from \code{RFGLS_estimate_spatial} or \code{RFGLS_estimate_timeseries}. }
+  \item{RFGLS_out}{an object obtained from \code{RFGLS_estimate_spatial}
+                   or \cr \code{RFGLS_estimate_timeseries}. }
 
   \item{Xtest}{an \eqn{ntest \times p}{ntest x p} matrix of covariates for prediction. Its Structure should be
                identical (including intercept) with that of covariates provided for estimation purpose in \code{X}
@@ -45,7 +46,7 @@ RFGLS_predict(RFGLS_out, Xtest, h = 1, verbose = FALSE)
   Saha, A., Basu, S., & Datta, A. (2020). Random Forests for dependent data. arXiv preprint arXiv:2007.15421.
 
   Andy Liaw, and Matthew Wiener (2015). randomForest: Breiman and Cutler's Random
-  Forests for Classification and Regression. R package version 4.6-14.
+  Forests for Classification and Regression. R package version 4.6-14. \cr
   https://CRAN.R-project.org/package=randomForest
 
 }
@@ -76,7 +77,8 @@ rho <- 0.5
 set.seed(3)
 b <- rho
 s <- sqrt(sigma.sq)
-eps = arima.sim(list(order = c(1,0,0), ar = b), n = n, rand.gen = rnorm, sd = s)
+eps = arima.sim(list(order = c(1,0,0), ar = b),
+                n = n, rand.gen = rnorm, sd = s)
 
 y <- eps + 10*sin(pi * x[,1])
 

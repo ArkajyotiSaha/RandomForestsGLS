@@ -9,18 +9,27 @@
   The fitted Random Forest (RF) model is used later for prediction via the \code{RFGLS_predict} and \code{RFGLS_predict_spatial}.
 
   Some code blocks are borrowed from the R packages: spNNGP:
-  Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes
-  https://CRAN.R-project.org/package=spNNGP and randomForest: Breiman and Cutler's Random
-  Forests for Classification and Regression https://CRAN.R-project.org/package=randomForest .
+  Spatial Regression Models for Large Datasets using Nearest
+  Neighbor Gaussian Process \cr
+  https://CRAN.R-project.org/package=spNNGP and randomForest:
+  Breiman and Cutler's Random
+  Forests for Classification and Regression \cr
+  https://CRAN.R-project.org/package=randomForest .
 
 }
 
 \usage{
-RFGLS_estimate_spatial(coords, y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20, mtry = 1,
-                       pinv_choice = 1, n_omp = 1, ntree = 50, h = 1, sigma.sq = 1,
-                       tau.sq = 0.1, phi = 5, nu = 0.5, n.neighbors = 15,
-                       cov.model = "exponential", search.type = "tree",
-                       param_estimate = FALSE, verbose = FALSE)
+RFGLS_estimate_spatial(coords, y, X, Xtest = NULL,
+                       nrnodes = NULL, nthsize = 20,
+                       mtry = 1, pinv_choice = 1,
+                       n_omp = 1, ntree = 50, h = 1,
+                       sigma.sq = 1, tau.sq = 0.1,
+                       phi = 5, nu = 0.5,
+                       n.neighbors = 15,
+                       cov.model = "exponential",
+                       search.type = "tree",
+                       param_estimate = FALSE,
+                       verbose = FALSE)
 }
 
 \arguments{
@@ -120,8 +129,8 @@ RFGLS_estimate_spatial(coords, y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20,
   https://CRAN.R-project.org/package=spNNGP
 
   Andy Liaw, and Matthew Wiener (2015). randomForest: Breiman and Cutler's Random
-  Forests for Classification and Regression. R package version 4.6-14.
-  https://CRAN.R-project.org/package=randomForest
+  Forests for Classification and Regression.
+  R package version 4.6-14. \cr https://CRAN.R-project.org/package=randomForest
 
 }
 
