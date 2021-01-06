@@ -17,13 +17,13 @@ RFGLS_predict(RFGLS_out, Xtest, h = 1, verbose = FALSE)
 
 \arguments{
 
-  \item{RFGLS_out}{An object obtained from \code{RFGLS_estimate_spatial} or \code{RFGLS_estimate_timeseries}. }
+  \item{RFGLS_out}{an object obtained from \code{RFGLS_estimate_spatial} or \code{RFGLS_estimate_timeseries}. }
 
   \item{Xtest}{an \eqn{ntest \times p}{ntest x p} matrix of covariates for prediction. Its Structure should be
                identical (including intercept) with that of covariates provided for estimation purpose in \code{X}
                in \code{RFGLS_out}. }
 
-  \item{h}{Number of core to be used in parallel computing setup for bootstrap samples. If \code{h = 1}, there is no parallelization.
+  \item{h}{number of core to be used in parallel computing setup for bootstrap samples. If \code{h = 1}, there is no parallelization.
            Default value is 1. }
 
   \item{verbose}{if \code{TRUE}, model specifications along with information regarding OpenMP support and progress of the algorithm

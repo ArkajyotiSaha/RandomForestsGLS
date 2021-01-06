@@ -3,8 +3,8 @@
 \title{Spatial response prediction at new location with RF-GLS}
 
 \description{
-  The function \code{RFGLS_predict_spatial} performs fast prediction on a set of new locations with
-  RF-GLS models in Saha et al. 2020 with nonlinear means using Nearest Neighbor Gaussian Processes (NNGP) (Datta et al., 2016).
+  The function \code{RFGLS_predict_spatial} performs fast prediction on a set of new locations by combining
+  non-linear mean estimate from a fitted RF-GLS model in Saha et al. 2020 with spatial kriging estimate obtained by using Nearest Neighbor Gaussian Processes (NNGP) (Datta et al., 2016).
 
   Some code blocks are borrowed from the R packages: spNNGP:
   Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes
@@ -19,7 +19,7 @@ RFGLS_predict_spatial(RFGLS_out, coords.0, Xtest, h = 1, verbose = FALSE)
 
 \arguments{
 
-  \item{RFGLS_out}{An object obtained from \code{RFGLS_estimate_spatial} or \code{RFGLS_estimate_timeseries}. }
+  \item{RFGLS_out}{an object obtained from \code{RFGLS_estimate_spatial} or \code{RFGLS_estimate_timeseries}. }
 
   \item{coords.0}{the spatial coordinates corresponding to prediction locations. Its structure should be same as that of coords
                   in \code{BRISC_estimation}. Default covariate value is a column of \eqn{1} to adjust for the mean (intercept). }
@@ -28,7 +28,7 @@ RFGLS_predict_spatial(RFGLS_out, coords.0, Xtest, h = 1, verbose = FALSE)
                identical (including intercept) with that of covariates provided for estimation purpose in \code{X}
                in \code{RFGLS_out}. }
 
-  \item{h}{Number of core to be used in parallel computing setup for bootstrap samples. If \code{h = 1}, there is no parallelization.
+  \item{h}{number of core to be used in parallel computing setup for bootstrap samples. If \code{h = 1}, there is no parallelization.
            Default value is 1. }
 
   \item{verbose}{if \code{TRUE}, model specifications along with information regarding OpenMP support and progress of the algorithm

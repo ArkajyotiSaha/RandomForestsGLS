@@ -6,7 +6,7 @@
   The function \code{RFGLS_estimate_spatial} fits univariate non-linear spatial regression models for
   spatial data using RF-GLS in Saha et al. 2020. \code{RFGLS_estimate_spatial} uses the sparse Cholesky representation
   of Vecchia’s likelihood (Vecchia, 1988) developed in Datta et al., 2016 and Saha & Datta, 2018.
-  The fitted Random Forest (RF) model is used later for prediction via the \code{RFGLS_predict}.
+  The fitted Random Forest (RF) model is used later for prediction via the \code{RFGLS_predict} and \code{RFGLS_predict_spatial}.
 
   Some code blocks are borrowed from the R packages: spNNGP:
   Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes
@@ -28,7 +28,7 @@ RFGLS_estimate_spatial(coords, y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20,
   \item{coords}{an \eqn{n \times 2}{n x 2} matrix of the observation
   coordinates in \eqn{R^2}{R^2} (e.g., easting and northing). }
 
-  \item{y}{a \eqn{n}{n} length vector of response at the observed coordinates. }
+  \item{y}{an \eqn{n}{n} length vector of response at the observed coordinates. }
 
   \item{X}{an \eqn{n \times p}{n x p} matrix of the covariates in the observation coordinates. }
 
@@ -36,16 +36,16 @@ RFGLS_estimate_spatial(coords, y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20,
                identical (including intercept) with that of covariates provided for estimation purpose in \code{X}.
                If \code{NULL}, will use \code{X} as \code{Xtest}. Default value is \code{NULL}. }
 
-  \item{nrnodes}{The maximum number of nodes a tree can have. Default choice leads to the deepest tree contigent on \code{nthsize}. For significantly large \eqn{n},
+  \item{nrnodes}{the maximum number of nodes a tree can have. Default choice leads to the deepest tree contigent on \code{nthsize}. For significantly large \eqn{n},
                    one needs to bound it for growing shallow trees which trades off efficiency for computation time. }
 
-  \item{nthsize}{Minimum size of leaf nodes. We recommend not setting this value too small, as that will lead to very deep trees
+  \item{nthsize}{minimum size of leaf nodes. We recommend not setting this value too small, as that will lead to very deep trees
                  that takes a lot of time to be built and can produce unstable estimaes. Default value is 20. }
 
-  \item{mtry}{Number of variables randomly sampled at each partition as a candidate split direction. We recommend using
+  \item{mtry}{number of variables randomly sampled at each partition as a candidate split direction. We recommend using
               the value p/3 where p is the number of variables in \code{X}. Default value is 1. }
 
-  \item{pinv_choice}{Dictates the choice of method for obtaining the pseudoinverse involved in the cost function and node
+  \item{pinv_choice}{dictates the choice of method for obtaining the pseudoinverse involved in the cost function and node
                      representative evaluation. if pinv_choice = 0, SVD is used (slower but more stable), if pinv_choice = 1,
                      orthogonal decomposition (faster, may produce unstable results if \code{nthsize} is too low) is used.
                      Default value is 1. }
@@ -53,9 +53,9 @@ RFGLS_estimate_spatial(coords, y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20,
   \item{n_omp}{number of threads to be used, value can be more than 1 if source code is compiled with OpenMP support.
                Default is 1. }
 
-  \item{ntree}{Number of trees to be grown. This value should not be too small. Default value is 50. }
+  \item{ntree}{number of trees to be grown. This value should not be too small. Default value is 50. }
 
-  \item{h}{Number of core to be used in parallel computing setup for bootstrap samples. If h = 1, there is no parallelization.
+  \item{h}{number of core to be used in parallel computing setup for bootstrap samples. If h = 1, there is no parallelization.
            Default value is 1. }
 
   \item{sigma.sq}{value of sigma square. Default value is 1. }
@@ -100,7 +100,7 @@ RFGLS_estimate_spatial(coords, y, X, Xtest = NULL, nrnodes = NULL, nthsize = 20,
 
   \item{y}{the vector \code{y}. }
 
-  \item{RFGLS_Object}{Object required for prediction. }
+  \item{RFGLS_Object}{object required for prediction. }
 
 }
 

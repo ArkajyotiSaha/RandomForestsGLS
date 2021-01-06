@@ -42,7 +42,7 @@ RFGLS_estimate_timeseries <- function(y, X, Xtest = NULL, nrnodes = NULL, nthsiz
   res_BF$nnIndxLU[(n+q+1):(2*n)] <- q
   res_BF$nnIndxLU[2:n] <- cumsum(res_BF$nnIndxLU[(n+1):((2*n)-1)])
   res_BF$nnIndx <- unlist(sapply(1:(n-1), function(i) (i-1):max(0, (i - q))))
-  res_Z <- .Call("RFGLS_invZcpp", as.integer(length(res_BF$nnIndxLU)/2), as.integer(res_BF$nnIndx), as.integer(res_BF$nnIndxLU), as.integer(rep(0, length(res_BF$nnIndxLU)/2)), as.integer(0*res_BF$nnIndx), as.integer(rep(0, length(res_BF$nnIndxLU)/2 + 1)), as.integer(rep(0, length(res_BF$nnIndxLU)/2)) )
+  res_Z <- .Call("RFGLS_invZcpp", as.integer(length(res_BF$nnIndxLU)/2), as.integer(res_BF$nnIndx), as.integer(res_BF$nnIndxLU), as.integer(rep(0, length(res_BF$nnIndxLU)/2)), as.integer(0*res_BF$nnIndx), as.integer(rep(0, length(res_BF$nnIndxLU)/2 + 1)), as.integer(rep(0, length(res_BF$nnIndxLU)/2)), PACKAGE = "RandomForestsGLS")
 
   p <- ncol(X)
   storage.mode(p) <- "integer"

@@ -73,8 +73,8 @@ RFGLS_estimate_spatial <- function(coords, y, X, Xtest = NULL, nrnodes = NULL, n
     cat(paste(("----------------------------------------"), collapse="   "), "\n"); cat(paste(("\tRFGLS Model Fitting"), collapse="   "), "\n"); cat(paste(("----------------------------------------"), collapse="   "), "\n")
   }
 
-  res_BF <- .Call("RFGLS_BFcpp", n, n.neighbors, coords, cov.model.indx, alpha.sq.starting, phi.starting, nu.starting, search.type.indx, n.omp.threads, verbose)
-  res_Z <- .Call("RFGLS_invZcpp", as.integer(length(res_BF$nnIndxLU)/2), as.integer(res_BF$nnIndx), as.integer(res_BF$nnIndxLU), as.integer(rep(0, length(res_BF$nnIndxLU)/2)), as.integer(0*res_BF$nnIndx), as.integer(rep(0, length(res_BF$nnIndxLU)/2 + 1)), as.integer(rep(0, length(res_BF$nnIndxLU)/2)) )
+  res_BF <- .Call("RFGLS_BFcpp", n, n.neighbors, coords, cov.model.indx, alpha.sq.starting, phi.starting, nu.starting, search.type.indx, n.omp.threads, verbose, PACKAGE = "RandomForestsGLS")
+  res_Z <- .Call("RFGLS_invZcpp", as.integer(length(res_BF$nnIndxLU)/2), as.integer(res_BF$nnIndx), as.integer(res_BF$nnIndxLU), as.integer(rep(0, length(res_BF$nnIndxLU)/2)), as.integer(0*res_BF$nnIndx), as.integer(rep(0, length(res_BF$nnIndxLU)/2 + 1)), as.integer(rep(0, length(res_BF$nnIndxLU)/2)), PACKAGE = "RandomForestsGLS")
 
   p <- ncol(X)
   storage.mode(p) <- "integer"
