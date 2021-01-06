@@ -9,7 +9,11 @@ Author: Arkajyoti Saha [aut, cre],
   Abhirup Datta [aut]
 Depends: R (>= 3.3.0)
 Imports: BRISC, parallel, stats, matrixStats, randomForest, pbapply
-Suggests: knitr, rmarkdown, ggplot2
+Suggests: 
+    knitr,
+    rmarkdown,
+    ggplot2,
+    testthat (>= 2.1.0)
 Description: Fits non-linear regression models on dependant data with Generalised Least Square (GLS) based Random Forest (RF-GLS) detailed in Saha, Basu and Datta (2020) <https://arxiv.org/abs/2007.15421>.
 License: GPL (>= 2)
 URL: https://github.com/ArkajyotiSaha/RandomForestsGLS
@@ -17,4 +21,3 @@ BugReports: https://github.com/ArkajyotiSaha/RandomForestsGLS/issues
 Encoding: UTF-8
 VignetteBuilder: knitr
 NeedsCompilation: yes
-
