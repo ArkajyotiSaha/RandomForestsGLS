@@ -24,7 +24,7 @@ For help on the functions in Brisc please use the following:
 ```
 
 ## Vignette
-A vignette for the package that describes how to use RF-GLS for estimating non-linear effects under dependent errors is avilable at https://github.com/ArkajyotiSaha/Article/blob/main/docs/RandomForestsGLS_user_guide.pdf
+The package vignette, available at https://github.com/ArkajyotiSaha/RandomForestsGLS/blob/main/inst/doc/RandomForestsGLS_user_guide.pdf demonstrates with example how the functions available in `RandomForestsGLS` can be used for non-linear regression analysis of dependent data. Specific functions are discussed in much detail in the code documentation of the package. 
 
 ## Note
 Some code blocks are borrowed from the R packages: spNNGP: Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes https://CRAN.R-project.org/package=spNNGP and randomForest: Breiman and Cutler's Random Forests for Classification and Regression https://CRAN.R-project.org/package=randomForest 
