@@ -91,14 +91,14 @@ extern "C" {
     int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
     double rcond = -1.0;
     /* Local arrays */
-    int *jvpt;
+    int *jvpt = NULL;
     jvpt = new int [ncolA];
     for(int zp = 0; zp < ncolA; zp++){
       jvpt[zp] = 0;
     }
     int lwork = -1;
 
-    int* iwork = NULL;
+
     double* work = NULL;
 
     double work_query;
@@ -130,22 +130,23 @@ extern "C" {
 
     free(y0);
     free(X0);
-    free(iwork);
+
     free(work);
-    free(jvpt);
+    delete [] jvpt;
     free(tmp_n);
     return(rss);
 
   }
 
-  double* pinv_dgelsy_beta_cpp(double *A, double *b, int nrowA, int ncolA){
+  void pinv_dgelsy_beta_cpp(double *A, double *b, int nrowA, int ncolA, double *beta){
 
 
     int inc = 1;
     int nlengthb=nrowA;
     int nlengthA=nrowA * ncolA;
 
-    double *y0 = (double *) malloc(nlengthb * sizeof(double));
+
+    double *y0 = (double *) malloc(nrowA * sizeof(double));
     F77_NAME(dcopy)(&nlengthb, b, &inc, y0, &inc);
 
     double *X0 = (double *) malloc(nlengthA * sizeof(double));
@@ -154,7 +155,7 @@ extern "C" {
     int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
     double rcond = -1.0;
     /* Local arrays */
-    int *jvpt;
+    int *jvpt = NULL;
     jvpt = new int [ncolA];
     for(int zp = 0; zp < ncolA; zp++){
       jvpt[zp] = 0;
@@ -172,10 +173,15 @@ extern "C" {
     work = (double *) malloc(lwork * sizeof(double));
     F77_NAME(dgelsy)(&m, &n, &nrhs, X0, &lda, y0, &ldb, jvpt, &rcond, &rank, work, &lwork, &info);
 
+    for(int lip = 0; lip < ncolA; lip++){
+      beta[lip] = y0[lip];
+    }
+
+
     free(X0);
+    free(y0);
     free(work);
-    free(jvpt);
-    return(y0);
+    delete [] jvpt;
 
   }
 
@@ -194,7 +200,7 @@ extern "C" {
     int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
     double rcond = -1.0;
     /* Local arrays */
-    double *s;
+    double *s = NULL;
     s = new double [nrowA];
     //double s[nrowA];
     int lwork = -1;
@@ -220,11 +226,11 @@ extern "C" {
     free(X0);
     free(iwork);
     free(work);
-    free(s);
+    delete [] s;
     return(rss);
   }
 
-  double* pinv_dgelsd_beta_cpp(double *A, double *b, int nrowA, int ncolA){
+  void pinv_dgelsd_beta_cpp(double *A, double *b, int nrowA, int ncolA, double *beta){
 
     int inc = 1;
     int nlengthb=nrowA;
@@ -239,7 +245,7 @@ extern "C" {
     int    m = nrowA, n = ncolA, nrhs = 1, lda = nrowA, ldb = nrowA, info, rank;
     double rcond = -1.0;
     /* Local arrays */
-    double *s;
+    double *s = NULL;
     s = new double [nrowA];
     //double s[nrowA];
     int lwork = -1;
@@ -255,7 +261,7 @@ extern "C" {
     work = (double *) malloc(lwork * sizeof(double));
     F77_NAME(dgelsd)(&m, &n, &nrhs, X0, &lda, y0, &ldb, s, &rcond, &rank, work, &lwork, iwork, &info);
 
-    double *beta = (double *) malloc(ncolA * sizeof(double));
+
     //calculate beta
     for(int lip = 0; lip < ncolA; lip++){
       beta[lip] = y0[lip];
@@ -265,8 +271,7 @@ extern "C" {
     free(X0);
     free(iwork);
     free(work);
-    free(s);
-    return(beta);
+    delete [] s;
   }
 
 
@@ -332,7 +337,8 @@ extern "C" {
     //allocated for the nearest neighbor index vector (note, first location has no neighbors).
     int nIndx = static_cast<int>(static_cast<double>(1+m)/2*m+(n-m-1)*m);
     SEXP nnIndx_r; PROTECT(nnIndx_r = allocVector(INTSXP, nIndx)); nProtect++; int *nnIndx = INTEGER(nnIndx_r);
-    SEXP d_r; PROTECT(d_r = allocVector(REALSXP, nIndx)); nProtect++; double *d = REAL(d_r);
+    //SEXP d_r; PROTECT(d_r = allocVector(REALSXP, nIndx)); nProtect++; double *d = REAL(d_r);
+    double *d = (double *) R_alloc(nIndx, sizeof(double));
     SEXP nnIndxLU_r; PROTECT(nnIndxLU_r = allocVector(INTSXP, 2*n)); nProtect++; int *nnIndxLU = INTEGER(nnIndxLU_r); //first column holds the nnIndx index for the i-th location and the second columns holds the number of neighbors the i-th location has (the second column is a bit of a waste but will simlifying some parallelization).
     //make the neighbor index
     if(verbose){
@@ -350,7 +356,8 @@ extern "C" {
     }
 
 
-    SEXP CIndx_r; PROTECT(CIndx_r = allocVector(INTSXP, 2*n)); nProtect++; int *CIndx = INTEGER(CIndx_r); //index for D and C.
+    //SEXP CIndx_r; PROTECT(CIndx_r = allocVector(INTSXP, 2*n)); nProtect++; int *CIndx = INTEGER(CIndx_r); //index for D and C.
+    int *CIndx = (int *) R_alloc(2*n, sizeof(int));
     for(i = 0, j = 0; i < n; i++){//zero should never be accessed
       j += nnIndxLU[n+i]*nnIndxLU[n+i];
       if(i == 0){
@@ -362,9 +369,10 @@ extern "C" {
       }
     }
 
-    SEXP j_r; PROTECT(j_r = allocVector(INTSXP, 1)); nProtect++; INTEGER(j_r)[0] = j;
+    //SEXP j_r; PROTECT(j_r = allocVector(INTSXP, 1)); nProtect++; INTEGER(j_r)[0] = j;
 
-    SEXP D_r; PROTECT(D_r = allocVector(REALSXP, j)); nProtect++; double *D = REAL(D_r);
+    //SEXP D_r; PROTECT(D_r = allocVector(REALSXP, j)); nProtect++; double *D = REAL(D_r);
+    double *D = (double *) R_alloc(j, sizeof(double));
 
     for(i = 0; i < n; i++){
       for(k = 0; k < nnIndxLU[n+i]; k++){
@@ -394,7 +402,7 @@ extern "C" {
 
     //return stuff
     SEXP result_r, resultName_r;
-    int nResultListObjs = 8;
+    int nResultListObjs = 4;
 
 
 
@@ -410,20 +418,8 @@ extern "C" {
     SET_VECTOR_ELT(result_r, 2, nnIndxLU_r);
     SET_VECTOR_ELT(resultName_r, 2, mkChar("nnIndxLU"));
 
-    SET_VECTOR_ELT(result_r, 3, CIndx_r);
-    SET_VECTOR_ELT(resultName_r, 3, mkChar("CIndx"));
-
-    SET_VECTOR_ELT(result_r, 4, D_r);
-    SET_VECTOR_ELT(resultName_r, 4, mkChar("D"));
-
-    SET_VECTOR_ELT(result_r, 5, d_r);
-    SET_VECTOR_ELT(resultName_r, 5, mkChar("d"));
-
-    SET_VECTOR_ELT(result_r, 6, nnIndx_r);
-    SET_VECTOR_ELT(resultName_r, 6, mkChar("nnIndx"));
-
-    SET_VECTOR_ELT(result_r, 7, j_r);
-    SET_VECTOR_ELT(resultName_r, 7, mkChar("Length.D"));
+    SET_VECTOR_ELT(result_r, 3, nnIndx_r);
+    SET_VECTOR_ELT(resultName_r, 3, mkChar("nnIndx"));
 
     namesgets(result_r, resultName_r);
 
@@ -950,13 +946,15 @@ extern "C" {
     PQZ = (double *) malloc (PQZ_length * sizeof(double));
     PQZ_update(P_index, Z_index, invP_val, invP_loc, B, F, nnIndx, nnIndxLU, n, rc, PQZ);
 
-    double *beta = (double *) R_alloc (rc, sizeof(double));
 
+    double *beta = NULL;
     if(pinv_choice == 0){
-      beta = pinv_dgelsd_beta_cpp(PQZ, PQy, nsample, rc);
+      beta = (double *) R_alloc (rc, sizeof(double));
+      pinv_dgelsd_beta_cpp(PQZ, PQy, nsample, rc, beta);
     }
     if(pinv_choice == 1){
-      beta = pinv_dgelsy_beta_cpp(PQZ, PQy, nsample, rc);
+      beta = (double *) R_alloc (rc, sizeof(double));
+      pinv_dgelsy_beta_cpp(PQZ, PQy, nsample, rc, beta);
     }
 
     free(PQZ);
