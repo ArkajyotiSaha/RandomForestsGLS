@@ -19,7 +19,10 @@ For installation of the CRAN version of the package, please use the following co
 install.packages("RandomForestsGLS")
 ```
 
-## Function description & documentation
+## Example usage: Vignette
+The package vignette, available at https://cran.rstudio.com/web/packages/RandomForestsGLS/vignettes/RandomForestsGLS_user_guide.pdf demonstrates with example how the functions available in `RandomForestsGLS` can be used for non-linear regression analysis of dependent data. Specific functions are discussed in much detail in the code documentation of the package. 
+
+## Function documentation
 
 For detailed help on the functions in `RandomForestsGLS` please use the following:
 ```{r }
@@ -28,10 +31,8 @@ For detailed help on the functions in `RandomForestsGLS` please use the followin
 ?RFGLS_predict #(for prediction of mean functtion)
 ?RFGLS_predict_spatial #(for prediction of Spatial Response)
 ```
-The function input and outputs are described in detail in the reference manual documentation, available in https://cran.rstudio.com/web/packages/RandomForestsGLS/RandomForestsGLS.pdf
+The function input and outputs are described in detail in the reference manual documentation, available in https://cran.rstudio.com/web/packages/RandomForestsGLS/RandomForestsGLS.pdf .
 
-## Vignette
-The package vignette, available at https://cran.rstudio.com/web/packages/RandomForestsGLS/vignettes/RandomForestsGLS_user_guide.pdf demonstrates with example how the functions available in `RandomForestsGLS` can be used for non-linear regression analysis of dependent data. Specific functions are discussed in much detail in the code documentation of the package. 
 
 ## Note
 Some code blocks are borrowed from the R packages: spNNGP: Spatial Regression Models for Large Datasets using Nearest Neighbor Gaussian Processes https://CRAN.R-project.org/package=spNNGP and randomForest: Breiman and Cutler's Random Forests for Classification and Regression https://CRAN.R-project.org/package=randomForest 
