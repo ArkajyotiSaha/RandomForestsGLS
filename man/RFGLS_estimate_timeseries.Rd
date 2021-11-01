@@ -115,14 +115,6 @@ RFGLS_estimate_timeseries(y, X, Xtest = NULL, nrnodes = NULL,
 
 \examples{
 
-rmvn <- function(n, mu = 0, V = matrix(1)){
-  p <- length(mu)
-  if(any(is.na(match(dim(V),p))))
-    stop("Dimension not right!")
-  D <- chol(V)
-  t(matrix(rnorm(n*p), ncol=p)\%*\%D + rep(mu,rep(n,p)))
-}
-
 set.seed(2)
 n <- 200
 x <- as.matrix(rnorm(n),n,1)
