@@ -26,6 +26,7 @@ test_that("estimate_spatial works", {
   expect_true(is.matrix(est_known$predicted_matrix))
   expect_equal(dim(est_known$predicted_matrix), c(200,10))
   expect_length(est_known$predicted, 200)
+  expect_equal(round(est_known$predicted[c(1,200)],3) == c(6.459, 3.807))
   set.seed(1)
   est_known_parallel <- RFGLS_estimate_spatial(coords, y, x, ntree = 10, cov.model = "exponential",
                                       nthsize = 20, sigma.sq = sigma.sq, tau.sq = tau.sq,
