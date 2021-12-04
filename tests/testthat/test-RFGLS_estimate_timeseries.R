@@ -14,6 +14,7 @@ test_that("estimate_timeseries works", {
   expect_true(is.matrix(est_temp_known$predicted_matrix))
   expect_equal(dim(est_temp_known$predicted_matrix), c(200,10))
   expect_length(est_temp_known$predicted, 200)
+  round(est_temp_known$predicted[c(1,200)],3) == c(8.317, 6.183)
   set.seed(1)
   est_temp_known_parallel <- RFGLS_estimate_timeseries(y, x, ntree = 10, lag_params = rho, nthsize = 20, h = 2)
   expect_equal( est_temp_known_parallel$P_matrix, est_temp_known$P_matrix)
