@@ -25,5 +25,5 @@ test_that("predict_spatial works", {
   RFGLS_predict_spatial <- RFGLS_predict_spatial(est_known_short, coords[161:200,],
                                                  matrix(x[161:200,],40,1))
   expect_length(RFGLS_predict_spatial$prediction, 40)
-  expect_equal(round(RFGLS_predict_spatial$prediction[c(1, 40)], 3) == c(5.795, 7.346))
+  expect_equal(round(RFGLS_predict_spatial$prediction[c(1, 40)], 3), c(5.795, 7.346))
 })

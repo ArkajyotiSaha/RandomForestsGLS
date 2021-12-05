@@ -28,5 +28,5 @@ test_that("predict works", {
   expect_true(is.matrix(RFGLS_predict_known$predicted_matrix))
   expect_equal(dim(RFGLS_predict_known$predicted_matrix), c(10001,10))
   expect_length(RFGLS_predict_known$predicted, 10001)
-  round(RFGLS_predict_known$predicted[c(1,10001)],3) == c(1.757, 1.312)
+  expect_equal(round(RFGLS_predict_known$predicted[c(1,10001)],3), c(1.757, 1.312))
 })
