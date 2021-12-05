@@ -1,3 +1,6 @@
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/ArkajyotiSaha/RandomForestsGLS/workflows/R-CMD-check/badge.svg)](https://github.com/ArkajyotiSaha/RandomForestsGLS/actions)
+<!-- badges: end -->
 
 # RandomForestsGLS
 ====
