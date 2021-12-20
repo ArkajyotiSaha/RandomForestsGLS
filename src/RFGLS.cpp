@@ -51,6 +51,7 @@ void updateBF_org(double *B, double *F, double *c, double *C, double *D, double 
 #ifdef _OPENMP
     threadID = omp_get_thread_num();
 #endif
+    //compute the covariance matrix of the neighbors
     if(i > 0){
       for(k = 0; k < nnIndxLU[n+i]; k++){
         c[nnIndxLU[i]+k] = spCor(d[nnIndxLU[i]+k], theta[1], nu, covModel, &bk[threadID*nb]);
@@ -61,6 +62,7 @@ void updateBF_org(double *B, double *F, double *c, double *C, double *D, double 
           }
         }
       }
+      //compute B & F, folloing BRISC
       F77_NAME(dpotrf)(&lower, &nnIndxLU[n+i], &C[CIndx[i]], &nnIndxLU[n+i], &info); if(info != 0){error("c++ error: dpotrf failed\n");}
       F77_NAME(dpotri)(&lower, &nnIndxLU[n+i], &C[CIndx[i]], &nnIndxLU[n+i], &info); if(info != 0){error("c++ error: dpotri failed\n");}
       F77_NAME(dsymv)(&lower, &nnIndxLU[n+i], &one, &C[CIndx[i]], &nnIndxLU[n+i], &c[nnIndxLU[i]], &inc, &zero, &B[nnIndxLU[i]], &inc);
@@ -74,9 +76,9 @@ void updateBF_org(double *B, double *F, double *c, double *C, double *D, double 
 }
 
 extern "C" {
-
+  
   double pinv_dgelsy_rss_cpp(double *A, double *b, int nrowA, int ncolA){
-
+  //computes the optimized minimum-norm of the least square problem, i.e. minimize||Ax - b|| with QR factorization
 
     int inc = 1;
     int nlengthb=nrowA;
@@ -139,7 +141,7 @@ extern "C" {
   }
 
   void pinv_dgelsy_beta_cpp(double *A, double *b, int nrowA, int ncolA, double *beta){
-
+  //computes the solution of minimum-norm least square problem, i.e. arg min||Ax - b|| with QR factorization
 
     int inc = 1;
     int nlengthb=nrowA;
@@ -186,7 +188,7 @@ extern "C" {
   }
 
   double pinv_dgelsd_rss_cpp(double *A, double *b, int nrowA, int ncolA){
-
+  //computes the optimized minimum-norm of the least square problem, i.e. minimize||Ax - b|| with SVD
     int inc = 1;
     int nlengthb=nrowA;
     int nlengthA=nrowA * ncolA;
@@ -231,7 +233,7 @@ extern "C" {
   }
 
   void pinv_dgelsd_beta_cpp(double *A, double *b, int nrowA, int ncolA, double *beta){
-
+  //computes the solution of minimum-norm least square problem, i.e. arg min||Ax - b|| with SVD
     int inc = 1;
     int nlengthb=nrowA;
     int nlengthA=nrowA * ncolA;
@@ -247,7 +249,7 @@ extern "C" {
     /* Local arrays */
     double *s = NULL;
     s = new double [nrowA];
-    //double s[nrowA];
+    
     int lwork = -1;
     int liwork;
     int* iwork = NULL;
@@ -369,11 +371,9 @@ extern "C" {
       }
     }
 
-    //SEXP j_r; PROTECT(j_r = allocVector(INTSXP, 1)); nProtect++; INTEGER(j_r)[0] = j;
 
-    //SEXP D_r; PROTECT(D_r = allocVector(REALSXP, j)); nProtect++; double *D = REAL(D_r);
     double *D = (double *) R_alloc(j, sizeof(double));
-
+    //compute the pairwise distances
     for(i = 0; i < n; i++){
       for(k = 0; k < nnIndxLU[n+i]; k++){
         for(l = 0; l <= k; l++){
@@ -429,6 +429,7 @@ extern "C" {
 
     return(result_r);
   }
+  //Notations:
   //invP_val = contains inverse of P. is of nsample length
   //invP_loc[i,i+1] = starting and ending location of invP(i). is of n+1 length.
   //invZ_val = contains inverse of nn mapping for every i.
@@ -436,6 +437,7 @@ extern "C" {
   //double *PQZ is a n x t_n length vector (a matrix, entered as vector).
 
   void PQZ_update(int *P, int *Z, int *invP_val, int *invP_loc, double *B, double *F, int *nnIndx, int *nnIndxLU, int n, int rc, double *PQZ){
+  //computes PQZ with B and F, which are building blocks for Q (BRISC notation)
     int i, j, l, t, temp_t;
     double tt_1, tt_2;
     for(i = 0; i < n; i++){
@@ -456,6 +458,7 @@ extern "C" {
   }
 
   void PQy_update(int *P, double *y, int *invP_val, int *invP_loc, double *B, double *F, int *nnIndx, int *nnIndxLU, int n, double *PQy){
+  //computes PQy with B and F, which are building blocks for Q (BRISC notation)
     int i, j, t, temp_t;
     double tt_1, tt_2;
     for(i = 0; i < n; i++){
@@ -474,7 +477,7 @@ extern "C" {
   }
 
   SEXP RFGLS_invZcpp(SEXP n_r, SEXP nnIndx_r, SEXP nnIndxLU_r, SEXP invZ_freq_r, SEXP invZ_val_r, SEXP invZ_loc_r, SEXP i_loc_r){
-
+  //computes the invZ_val and invZ_loc defined in notations
     int n = INTEGER(n_r)[0];
     int *nnIndx = INTEGER(nnIndx_r);
     int *nnIndxLU = INTEGER(nnIndxLU_r);
@@ -610,7 +613,7 @@ extern "C" {
       nwhole_l = 0;
       nwhole_r = npop_tot;
       tieVal = 1;
-
+      //implement the update rule associated with changing "one" membership allocation, descried in the associated paper
       for(j = ndstart; j <= ndend - 1; ++j) {
         temp_i = yl_index[ncase[j] - 1];
         Z_index_local[temp_i] = rc;
@@ -843,7 +846,7 @@ extern "C" {
     for(i = 0; i < n; i++){
       i_loc[i] = 0;
     }
-
+    //compute invP_val defined in notations earlier. 
     for(i = 0; i < nsample; i++){
       invP_val[invP_loc[P_index[i]] + i_loc[P_index[i]]] = i;
       i_loc[P_index[i]] = i_loc[P_index[i]] + 1;
