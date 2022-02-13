@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The package `RandomForestsGLS` fits non-linear regression models on dependent data with Generalised Least Square (GLS) based Random Forest (RF-GLS) detailed in Saha, Basu and Datta (2020) https://arxiv.org/abs/2007.15421. We will start by loading the `RandomForestsGLS` R package.
+The package `RandomForestsGLS` fits non-linear regression models on dependent data with Generalised Least Square (GLS) based Random Forest (RF-GLS) detailed in Saha, Basu and Datta (2021) https://www.tandfonline.com/doi/full/10.1080/01621459.2021.1950003. We will start by loading the `RandomForestsGLS` R package.
 
 ```{r setup}
 library(RandomForestsGLS)
@@ -31,7 +31,7 @@ y_i = m(\mathbf{x}_i) + w(\mathbf{s}_i) + \epsilon_i;
 $$
 where, $y_i, \mathbf{x}_i$ respectively denotes the observed response and the covariate corresponding to the $i^{th}$ observed location $\mathbf{s}_i$. $m(\mathbf{x}_i)$ denotes the covariate effect, spatial random effect, $w (\mathbf{s})$ accounts for spatial dependence beyond covariates, and $\mathbf{\epsilon}$ accounts for the independent and identically distributed random Gaussian noise. 
 
-In the spatial mixture model setting, the package `RandomForestsGLS` allows for fitting $m(.)$ using RF-GLS. Spatial random effects are modeled using Gaussian Process as is the practice. For model fitting, we use the computationally convenient Nearest Neighbor Gaussian Process (NNGP) (Datta, Banerjee, Finley, and Gelfand (2016)). Along with prediction of the covariate effect (mean function) $m(.)$ we also offer kriging based prediction of spatial responses at new location. 
+In the spatial mixed model setting, the package `RandomForestsGLS` allows for fitting $m(.)$ using RF-GLS. Spatial random effects are modeled using Gaussian Process as is the practice. For model fitting, we use the computationally convenient Nearest Neighbor Gaussian Process (NNGP) (Datta, Banerjee, Finley, and Gelfand (2016)) for the spatial random effects $w(\cdot)$. Along with prediction of the covariate effect (mean function) $m(.)$ we also offer kriging based prediction of spatial responses at new location. 
 
 
 ## Illustration
